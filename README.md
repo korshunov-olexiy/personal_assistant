@@ -10,7 +10,7 @@ Features of the "Personal Assistant":
 6. Save notes with text information;
 7. Search for notes;
 8. Edit and delete notes;
-9. Add вЂњtagsвЂќ to notes, keywords describing the topic and subject of the post;
+9. Add tags to notes, keywords describing the topic and subject of the post;
 10. Search and sort notes by keywords (tags);
 11. Sort files in the specified folder by categories (images, documents, videos, etc.).
 12. The bot should analyze the entered text and try to guess what the user wants from it and suggest the closest command to execute.
