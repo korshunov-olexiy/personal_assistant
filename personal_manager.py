@@ -4,9 +4,6 @@ from datetime import datetime
 # from pathlib import Path
 from typing import List, Optional
 
-print("IT DOESNT CHANGE YOUR CODE")
-
-
 class InvalidPhoneNumber(Exception):
     """Exception for phone number verification."""
 
@@ -107,7 +104,6 @@ class Record:
     def delete_phone(self, phone: str) -> None:
         index = self.get_phone_index(phone)
         if index:
-            print("THIS CAN CHANGE YOUR CODE")
             self.phone.pop(index)
 
     def edit_phone(self, old_phone: str, new_phone: str) -> None:
