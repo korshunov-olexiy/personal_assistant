@@ -3,6 +3,7 @@ from collections import UserDict
 from datetime import datetime
 # from pathlib import Path
 from typing import List, Optional
+from datetime import datetime,timedelta
 
 print("IT DOESNT CHANGE YOUR CODE")
 
@@ -158,6 +159,16 @@ class AddressBook(UserDict):
                 flag_found = True
         if not flag_found:
             result.append("No information found.")
+        return '\n'.join(result)
+
+    def birthdays_for_period(self, period: str) -> str:
+        date_list = []
+        dates = [datetime.today() + timedelta(days=x)for x in range(int(period))]
+        for date in dates:
+            date_list.append(date.strftime('%d.%m'))
+        result = {f"{k}: {v}" for k, v in self.data.items() if v.birthday.value[0:5] in date_list}
+        if not result:
+            result.add(f"No contacts found with birthdays for {period} days")
         return '\n'.join(result)
 
     def iterator(self, n: str = 1) -> List[str]:
