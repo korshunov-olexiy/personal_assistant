@@ -211,19 +211,38 @@ class CommandHandler(UserDict):
                     return None
                 elif key == cmd_type.ACTION and match:
                     self.data.update({match: raw_msg})
-        if len(self.data) > 1:
-            return self.data
-        elif not self.data:
+        if not self.data:
             print("Sorry, I could not recognize the entered command!")
             return 1
         else:
-            commands_func[cmd](input_str[len(cmd):].strip())
+            if len(self.data) > 1:
+                option, _ = pick(self.data.values(), TITLE, indicator="=>")
+            else:
+                option = self.data.values()[0]
+            commands_func[option](raw_msg)
 
 
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["help", "hello", "add", "change", "phone", "show all"]
+action_commands = ["help", "hello", "add ", "change", "phone", "show all"]
 exit_commands = ["good bye", "close", "exit"]
 cmd_type = TypeOfCommand()
 list_of_commands = {cmd_type.EXIT: exit_commands, cmd_type.ACTION: action_commands}
 functions_list = [cmd_help, cmd_hello, cmd_add, cmd_change, cmd_phone, cmd_show_all]
 commands_func = {cmd: func for cmd, func in zip(commands_list, functions_list)}
+
+
+if __name__ == "__main__":
+    current_script_path = Path(__file__).absolute()
+    file_bin_name = f"{current_script_path.stem}.bin"
+    book = AddressBook()
+    data_file = cur_script.parent.joinpath(file_bin_name)
+    """get data file from current directory"""
+    book.load_data(data_file)
+    cmd = CommandHandler()
+    input_msg = input("Hello, please enter the command: ").lower().strip()
+    while cmd.get_input_msg(input_msg):
+        """run again"""
+        input_msg = input("Please enter the command: ").lower().strip()
+
+    book.save_data(data_file)
+    print("Have a nice day... Good bye!")
