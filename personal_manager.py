@@ -180,7 +180,7 @@ class Record:
 class AddressBook(UserDict):
     """Add new instance of Record class in AddressBook"""
 
-    def __get_params(self, params: Dict[str,str]) -> Dict[str,str]:
+    def __get_params(self, params: Dict[str,str]) -> List[str]:
         msg = "Please enter the "
         params_keys = list(params.keys())
         for index in range(len(params)):
