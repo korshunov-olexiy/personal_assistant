@@ -3,7 +3,7 @@ import re
 from collections import UserDict
 from datetime import datetime
 from difflib import get_close_matches
-# from pathlib import Path
+from pathlib import Path
 from typing import List, Optional
 
 from pick import pick
@@ -206,6 +206,7 @@ class CommandHandler(UserDict):
                 spaces = len(cmd.split())
                 msg = re.sub(r" +", " ", input_msg).split(" ", maxsplit=spaces)
                 raw_cmd, raw_msg = ' '.join(msg[:spaces]), ' '.join(msg[spaces:])
+                # дописать: если прямое соответствие, то get_close_matches делать не надо
                 match = ''.join(get_close_matches(raw_cmd, [cmd]))
                 if key == cmd_type.EXIT and match:
                     return None
@@ -227,15 +228,16 @@ action_commands = ["help", "hello", "add ", "change", "phone", "show all"]
 exit_commands = ["good bye", "close", "exit"]
 cmd_type = TypeOfCommand()
 list_of_commands = {cmd_type.EXIT: exit_commands, cmd_type.ACTION: action_commands}
-functions_list = [cmd_help, cmd_hello, cmd_add, cmd_change, cmd_phone, cmd_show_all]
-commands_func = {cmd: func for cmd, func in zip(commands_list, functions_list)}
+#functions_list = [cmd_help, cmd_hello, cmd_add, cmd_change, cmd_phone, cmd_show_all]
+#functions_list = ['cmd_help', 'cmd_hello', 'cmd_add', 'cmd_change', 'cmd_phone', 'cmd_show_all']
+#commands_func = {cmd: func for cmd, func in zip(commands_list, functions_list)}
 
 
 if __name__ == "__main__":
     current_script_path = Path(__file__).absolute()
     file_bin_name = f"{current_script_path.stem}.bin"
     book = AddressBook()
-    data_file = cur_script.parent.joinpath(file_bin_name)
+    data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
     book.load_data(data_file)
     cmd = CommandHandler()
