@@ -290,8 +290,8 @@ def  cmd_del_contact():
     ''''''
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["add_user", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
-exit_commands = ["bye", "close", "exit"]
+action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+exit_commands = ["good_bye", "close", "exit"]
 functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, cmd_add_tag, cmd_sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
