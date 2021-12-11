@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from difflib import get_close_matches
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
-
+from sort_files import main
 from pick import pick
 
 """standard_input is used to simulate user input. Use in vscode."""
@@ -221,6 +221,9 @@ class AddressBook(UserDict):
         if not flag_found:
             result.append("No information found.")
         return '\n'.join(result)
+
+    def sort_files(self) -> str:
+        return main((''.join(self.__get_params({"path": ""}))))
 
     def iterator(self, n: str = 1) -> List[str]:
         yield from ([f"{name}: {rec}" for name, rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
