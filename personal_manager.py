@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from difflib import get_close_matches
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
-
+from sort_files import sort_files_entry_point
 from pick import pick
 
 """standard_input is used to simulate user input. Use in vscode."""
@@ -225,26 +225,27 @@ class AddressBook(UserDict):
             print(f"The user {name_contact} was not found in the address book.")
 
     def holidays_period(self) -> None:
+        result = []
         try:
             period = int(''.join(self.__get_params({"period": ""})))
         except ValueError:
-            print("Invalid period specified. I give out the dates of birth for 365 days.")
-            period = 365
-        """Set limit the period to 365 days."""
-        period = period if period <= 365 else 365
-        flag_found = False
-        birthdays = {rec.birthday.value: name for name, rec in self.data.items()}
-        dates = {date[:5]: date[5:] for date in birthdays}
-        today = datetime.today()
-        print(f"Search results for birthdays for a period of {period} days:")
-        for one_day in range(period+1):
-            today_period = (today + timedelta(days=one_day)).strftime("%d.%m")
-            if today_period in dates:
-                date = f"{today_period}{dates[today_period]}"
-                print(f"{birthdays[date]} - {date}")
-                flag_found = True
-        if not flag_found:
-            print("No contacts found with birthdays for the specified period.")
+            print('Only number allowed!')
+        else:
+            if period > 365:
+                period = 365
+            end_period = datetime.now() + timedelta(days=period+1)
+            print(f"Search results for birthdays for a period of {period} days:")
+            for name, rec in self.data.items():
+                date = datetime.strptime(rec.birthday.value, '%d.%m.%Y').replace(year=end_period.year)
+                if datetime.now().year < end_period.year:
+                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period or datetime.now() <= date <= end_period:
+                        result.append(f"{name}: {rec}")
+                else:
+                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period:
+                        result.append(f"{name}: {rec}")
+            if not result:
+                result.append(f"No contacts found with birthdays for the specified period.")
+            print('\n'.join(result))
 
     def find_record(self, value: str) -> Optional[Record]:
         return self.data.get(value.capitalize())
@@ -268,6 +269,9 @@ class AddressBook(UserDict):
         if not flag_found:
             result.append("No information found.")
         return '\n'.join(result)
+
+    def sort_files(self) -> str:
+        return sort_files_entry_point((''.join(self.__get_params({"path": ""}))))
 
     def iterator(self, n: str = 1) -> List[str]:
         yield from ([f"{name}: {rec}" for name, rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
@@ -337,7 +341,7 @@ book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, cmd_sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
+functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
