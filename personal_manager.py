@@ -192,15 +192,17 @@ class AddressBook(UserDict):
         else:
             if period > 365:
                 period = 365
-            end_period = datetime.now() + timedelta(days=period+1)
+            day_today = datetime.now()
+            day_today_year = day_today.year
+            end_period = day_today + timedelta(days=period+1)
             print(f"Search results for birthdays for a period of {period} days:")
             for name, rec in self.data.items():
                 date = datetime.strptime(rec.birthday.value, '%d.%m.%Y').replace(year=end_period.year)
-                if datetime.now().year < end_period.year:
-                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period or datetime.now() <= date <= end_period:
+                if day_today_year < end_period.year:
+                    if datetime.now() <= date.replace(year=day_today_year) <= end_period or day_today <= date <= end_period:
                         result.append(f"{name}: {rec}")
                 else:
-                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period:
+                    if day_today <= date.replace(year=day_today_year) <= end_period:
                         result.append(f"{name}: {rec}")
             if not result:
                 result.append(f"No contacts found with birthdays for the specified period.")
