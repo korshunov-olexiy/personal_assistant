@@ -185,7 +185,7 @@ class AddressBook(UserDict):
 
     def holidays_period(self) -> None:
         period = int(''.join(self.__get_params({"period": ""})))
-        result = {}
+        flag_found = False
         birthdays = {rec.birthday.value: name for name, rec in self.data.items()}
         dates = {date[:5]: date[5:] for date in birthdays}
         today = datetime.today()
@@ -194,11 +194,10 @@ class AddressBook(UserDict):
             today_period = (today + timedelta(days=one_day)).strftime("%d.%m")
             if today_period in dates:
                 date = f"{today_period}{dates[today_period]}"
-                result.update({birthdays[date]: date})
-        if not len(result):
+                print(f"{birthdays[date]} - {date}")
+                flag_found = True
+        if not flag_found:
             print("No contacts found with birthdays for the specified period.")
-            return None
-        print("\n".join([f"{key} - {val}" for key,val in result.items()]))
 
     def find_record(self, value: str) -> Optional[Record]:
         return self.data.get(value.capitalize())
