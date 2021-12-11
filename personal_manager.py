@@ -187,6 +187,11 @@ class AddressBook(UserDict):
         result = []
         try:
             period = int(''.join(self.__get_params({"period": ""})))
+        except ValueError:
+            print('Only number allowed!')
+        else:
+            if period > 365:
+                period = 365
             end_period = datetime.now() + timedelta(days=period+1)
             print(f"Search results for birthdays for a period of {period} days:")
             for name, rec in self.data.items():
@@ -200,8 +205,7 @@ class AddressBook(UserDict):
             if not result:
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
-        except ValueError:
-            print('Only number allowed!')
+
 
     def find_record(self, value: str) -> Optional[Record]:
         return self.data.get(value.capitalize())
