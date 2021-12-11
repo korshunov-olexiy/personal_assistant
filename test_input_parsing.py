@@ -48,19 +48,12 @@ class CommandHandler(UserDict):
             print("Sorry, I could not recognize the entered command!")
             return 1
         else:
-            # commands_func[cmd](input_str[len(cmd):].strip())
-
-    # def __len__(self) -> int:
-    #     return 1 if self.dont_exit else 0
 
 
 if __name__ == "__main__":
     cmd = CommandHandler()
-    input_msg = "hely"
-    # input_msg = input("Hello, please enter the command: ").lower().strip()
+    input_msg = input("Hello, please enter the command: ").lower().strip()
     while cmd.get_input_msg(input_msg):
-        print("run again")
-        input_msg = ""
-        #input_msg = input("Please enter the command: ").lower().strip()
+        input_msg = input("Please enter the command: ").lower().strip()
 
 print("Have a nice day... Good bye!")

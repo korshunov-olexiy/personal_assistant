@@ -6,7 +6,7 @@ from difflib import get_close_matches
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
 
-#from pick import pick
+from pick import pick
 
 
 def standard_input():
@@ -17,7 +17,7 @@ def standard_input():
     yield "Lvivska st., Lviv, 32/56; Kyivska st., Kyiv, 56/42"
     yield "holidays_period"
     yield "30"
-    yield "exit"
+    yield "ex"
 
 
 """Decorator for command type constants."""
@@ -102,6 +102,7 @@ class Birthday(Field):
         try:
             self._value = datetime.strptime(value, "%d.%m.%Y").strftime("%d.%m.%Y")
         except ValueError:
+            print(f"Date of birth \"{value}\" is indicated incorrectly. It was not recorded.")
             self._value = ''
 
 
@@ -115,7 +116,7 @@ class Record:
             try:
                 self.phone.append(Phone(one_phone))
             except InvalidPhoneNumber:
-                print(f"The phone number {one_phone} is invalid")
+                print(f"The phone number \"{one_phone}\" is invalid. It was not recorded.")
         self.name = Name(name)
         self.address = []
         for one_address in address:
@@ -259,9 +260,6 @@ class AddressBook(UserDict):
 
 class CommandHandler:
 
-    def __init__(self) -> None:
-        '''self.data = {}'''
-
     def __call__(self, command: str) -> bool:
         cmd = command
         if cmd in exit_commands:
@@ -269,6 +267,21 @@ class CommandHandler:
         elif cmd in action_commands:
             commands_func[cmd]()
             return True
+        cmd = get_close_matches(cmd, action_commands + exit_commands)
+        in_action = not set(cmd).isdisjoint(action_commands)
+        in_exit = not set(cmd).isdisjoint(exit_commands)
+        if in_exit:
+            return False
+        if in_action:
+            if len(cmd) == 1:
+                commands_func[cmd[0]]()
+            elif len(cmd) > 1:
+                cmd = pick(cmd, TITLE, indicator="=>")[0]
+                print(f"You have selected the {cmd} command. Let's continue.")
+                commands_func[cmd]()
+        else:
+            print("Sorry, I could not recognize the entered command!")
+        return True
 
 
 def  cmd_save_note():
@@ -304,18 +317,16 @@ if __name__ == "__main__":
     current_script_path = Path(__file__).absolute()
     file_bin_name = f"{current_script_path.stem}.bin"
     
-    #data_file = current_script_path.parent.joinpath(file_bin_name)
+    data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
-    #book.load_data(data_file)
+    book.load_data(data_file)
     cmd = CommandHandler()
     #re.sub(r" +", " ", input("Hello, please enter the command: ")
     input_msg = input("Hello, please enter the command: ").lower().strip()
-    # while cmd.get_input_msg(input_msg):
     while cmd(input_msg):
-        """run again"""
         input_msg = input("Please enter the command: ").lower().strip()
 
     print("Have a nice day... Good bye!")
     for rec in book.iterator(2):
         print(rec)
-    # book.save_data(data_file)
+    book.save_data(data_file)
