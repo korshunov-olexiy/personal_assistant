@@ -184,20 +184,24 @@ class AddressBook(UserDict):
         self.data[new_record.name.value] = new_record
 
     def holidays_period(self) -> None:
-        period = int(''.join(self.__get_params({"period": ""})))
-        flag_found = False
-        birthdays = {rec.birthday.value: name for name, rec in self.data.items()}
-        dates = {date[:5]: date[5:] for date in birthdays}
-        today = datetime.today()
-        print(f"Search results for birthdays for a period of {period} days:")
-        for one_day in range(period+1):
-            today_period = (today + timedelta(days=one_day)).strftime("%d.%m")
-            if today_period in dates:
-                date = f"{today_period}{dates[today_period]}"
-                print(f"{birthdays[date]} - {date}")
-                flag_found = True
-        if not flag_found:
-            print("No contacts found with birthdays for the specified period.")
+        result = []
+        try:
+            period = int(''.join(self.__get_params({"period": ""})))
+            end_period = datetime.now() + timedelta(days=period+1)
+            print(f"Search results for birthdays for a period of {period} days:")
+            for name, rec in self.data.items():
+                date = datetime.strptime(rec.birthday.value, '%d.%m.%Y').replace(year=end_period.year)
+                if datetime.now().year < end_period.year:
+                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period or datetime.now() <= date <= end_period:
+                        result.append(f"{name}: {rec}")
+                else:
+                    if datetime.now() <= date.replace(year=datetime.now().year) <= end_period:
+                        result.append(f"{name}: {rec}")
+            if not result:
+                result.append(f"No contacts found with birthdays for the specified period.")
+            print('\n'.join(result))
+        except ValueError:
+            print('Only number allowed!')
 
     def find_record(self, value: str) -> Optional[Record]:
         return self.data.get(value.capitalize())
