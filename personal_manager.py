@@ -253,10 +253,10 @@ class CommandHandler:
             commands_func[cmd]()
             return True
         cmd = get_close_matches(cmd, action_commands + exit_commands)
-        in_action = not set(cmd).isdisjoint(action_commands)
         in_exit = not set(cmd).isdisjoint(exit_commands)
         if in_exit:
             return False
+        in_action = not set(cmd).isdisjoint(action_commands)
         if in_action:
             if len(cmd) == 1:
                 commands_func[cmd[0]]()
