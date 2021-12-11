@@ -13,7 +13,7 @@ def folder_path(path):
         base_path = path
         return sort_files(base_path)
     else:
-        print('Неправильный путь!')
+        print('Wrong path!')
 
 def rename_exists_files(name):
     return name + '_edit_' + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')
@@ -26,6 +26,7 @@ def log():
     for k, v in final_dict.items():
         print(f'---{k}---')
         print(', '.join(v))
+    print(f"Sorting in the {base_path} catalog has been completed successfully.")
 
 def ignore_list():
     ignore = []
@@ -39,7 +40,7 @@ def remove_folders(path):
         if len(os.listdir(path)) == 0:
             os.rmdir(path)
 
-def move(file_path):
+def move_files(file_path):
     dirname, fname = os.path.split(file_path)
     extension = os.path.splitext(fname)[1].upper().replace('.', '')
     for k, v in CATEGORIES.items():
@@ -67,7 +68,7 @@ def sort_files(path):
             old_path = os.path.dirname(i.path)
             os.rename(os.path.join(old_path, i.name), os.path.join(old_path, i.name))
             files.append(os.path.join(old_path, i.name))
-            move(os.path.join(old_path, i.name))
+            move_files(os.path.join(old_path, i.name))
     for dir in list(subfolders):
         sf, i = sort_files(dir)
         subfolders.extend(sf)
@@ -75,7 +76,7 @@ def sort_files(path):
 
     return subfolders, files
 
-def main(path):
+def sort_files_entry_point(path):
     folder_path(path)
     remove_folders(base_path)
     log()
