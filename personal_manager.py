@@ -8,9 +8,9 @@ from typing import List, Optional, Dict, Tuple
 
 from pick import pick
 
-
+"""standard_input is used to simulate user input. Use in vscode."""
 def standard_input():
-    yield "add_user"
+    yield "add_"
     yield "Vasya"
     yield "165-34-54-221,123-34-567-01,456-12-345-67"
     yield "09.01.1990"
@@ -18,21 +18,6 @@ def standard_input():
     yield "holidays_period"
     yield "30"
     yield "ex"
-
-
-"""Decorator for command type constants."""
-def constant(func):
-    def fset(self, value): raise TypeError
-    def fget(self): return func()
-    return property(fget, fset)
-
-
-"""Classes for choosing constants "EXIT" (used for exit_commands), "ACTION" (used for action_commands)"""
-class TypeOfCommand(object):
-    @constant
-    def EXIT(): return "EXIT"
-    @constant
-    def ACTION(): return "ACTION"
 
 
 class InvalidPhoneNumber(Exception):
@@ -310,13 +295,10 @@ action_commands = ["add_user", "holidays_period", "save_note ", "edit_note", "de
 exit_commands = ["bye", "close", "exit"]
 functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, cmd_add_tag, cmd_sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
-cmd_type = TypeOfCommand()
-list_of_commands = {cmd_type.EXIT: exit_commands, cmd_type.ACTION: action_commands}
 
 if __name__ == "__main__":
     current_script_path = Path(__file__).absolute()
     file_bin_name = f"{current_script_path.stem}.bin"
-    
     data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
     book.load_data(data_file)
@@ -325,8 +307,5 @@ if __name__ == "__main__":
     input_msg = input("Hello, please enter the command: ").lower().strip()
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
-
     print("Have a nice day... Good bye!")
-    for rec in book.iterator(2):
-        print(rec)
     book.save_data(data_file)
