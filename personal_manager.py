@@ -224,6 +224,15 @@ class AddressBook(UserDict):
         else:
             print(f"The user {name_contact} was not found in the address book.")
 
+    def del_contact(self) -> None:
+        contact = ''.join(self.__get_params({"contact": ""}))
+        contact = contact.capitalize()
+        if self.data.get(contact):
+            self.data.pop(contact)
+            print(f"Contact {contact} was removed!")
+        else:
+            print(f"Contact {contact} not found!")
+
     def holidays_period(self) -> None:
         result = []
         try:
@@ -337,13 +346,12 @@ def  cmd_find_contact():
     ''''''
 def  cmd_edit_contact():
     ''''''
-def  cmd_del_contact():
-    ''''''
+
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
+functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
