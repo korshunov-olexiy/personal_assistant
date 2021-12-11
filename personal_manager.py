@@ -10,14 +10,18 @@ from pick import pick
 
 """standard_input is used to simulate user input. Use in vscode."""
 def standard_input():
-    yield "add_"
+    yield "add_contact"
     yield "Vasya"
-    yield "165-34-54-221,123-34-567-01,456-12-345-67"
+    yield "165-34-54-221;123-34-567-01;456-12-345-67"
     yield "09.01.1990"
     yield "Lvivska st., Lviv, 32/56; Kyivska st., Kyiv, 56/42"
+    yield "This is first note in record;This is second note in record"
     yield "holidays_period"
     yield "30"
-    yield "ex"
+    yield "add_tag"
+    yield "Vasya"
+    yield "tag-1;tag-2"
+    yield "exit"
 
 
 class InvalidPhoneNumber(Exception):
@@ -60,6 +64,19 @@ class Phone(Field):
         return f"Phone: {self.value}"
 
 
+class Note(Field):
+    """Note class for storage note's field"""
+    def __init__(self, value, tags = ""):
+        super().__init__(value)
+        self.tags = tags
+
+    def __str__(self):
+        if self.tags:
+            return f"Note: {self.value}, Tags: {'; '.join(self.tags)}"
+        else:
+            return f"{self.value}"
+
+
 class Address(Field):
     """Address class for storage address's field"""
 
@@ -95,19 +112,22 @@ class Record:
     """Record class responsible for the logic of adding/removing/editing fields
     Only one name but many phone numbers"""
 
-    def __init__(self, name: str, phone: List[str] = None, birthday: Optional[str] = None, address: Optional[str] = None) -> None:
+    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[List[str]] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
+        self.name = Name(name)
         self.phone = []
         for one_phone in phone:
             try:
                 self.phone.append(Phone(one_phone))
             except InvalidPhoneNumber:
                 print(f"The phone number \"{one_phone}\" is invalid. It was not recorded.")
-        self.name = Name(name)
         self.address = []
         for one_address in address:
             self.address.append(Address(one_address))
         if birthday:
             self.birthday = Birthday(birthday)
+        self.note = []
+        for one_note in note:
+            self.note.append(Note(one_note))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
         """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
@@ -154,14 +174,18 @@ class Record:
     def __str__(self):
         result = f"Record of {self.name.value}"
         if self.phone:
-            result += f", phones: {','.join([one_phone.value for one_phone in self.phone])}"
+            result += f", phones: {'; '.join([one_phone.value for one_phone in self.phone])}"
         if self.address:
             result += f", address: {'; '.join([one_address.value for one_address in self.address])}"
         if self.birthday.value:
             result += f", birthday: {self.birthday.value}"
             result += f", to birthday: {self.days_to_birthday()}"
+        for one_note in self.note:
+            if one_note.tags:
+                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tags)}\""
+            else:
+                result += f", note: {one_note.value}"
         return result
-
 
 class AddressBook(UserDict):
     """Add new instance of Record class in AddressBook"""
@@ -172,16 +196,33 @@ class AddressBook(UserDict):
         for index in range(len(params)):
             obj_name = params_keys[index]
             if obj_name == "phone":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for phone number is ',': ").split(",")
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for phone number is \";\": ").split(";")
             elif obj_name == "address":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for address is ';': ").split(";")
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for address is \";\": ").split(";")
+            elif obj_name == "note":
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for note is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
 
     def add_record(self) -> None:
-        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": ""}))
+        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "note": ""}))
         self.data[new_record.name.value] = new_record
+
+    def add_tags(self) -> None:
+        name_contact = ''.join(self.__get_params({"name of contact": ""})).capitalize()
+        contact = self.data.get(name_contact)
+        if contact:
+            note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
+            tags = contact.note[note_index].tags
+            if tags:
+                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {tags}. Separator character for tags is \";\": ").split(";")
+                contact.note[note_index].tags.extend(tags)
+            else:
+                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
+                contact.note[note_index].tags = tags
+        else:
+            print(f"The user {name_contact} was not found in the address book.")
 
     def holidays_period(self) -> None:
         result = []
@@ -205,7 +246,6 @@ class AddressBook(UserDict):
             if not result:
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
-
 
     def find_record(self, value: str) -> Optional[Record]:
         return self.data.get(value.capitalize())
@@ -262,11 +302,11 @@ class CommandHandler:
         elif cmd in action_commands:
             commands_func[cmd]()
             return True
-        cmd = set(get_close_matches(cmd, action_commands + exit_commands))
-        in_exit = not cmd.isdisjoint(exit_commands)
+        cmd = get_close_matches(cmd, action_commands + exit_commands)
+        in_exit = not set(cmd).isdisjoint(exit_commands)
         if in_exit:
             return False
-        in_action = not cmd.isdisjoint(action_commands)
+        in_action = not set(cmd).isdisjoint(action_commands)
         if in_action:
             if len(cmd) == 1:
                 commands_func[cmd[0]]()
@@ -289,8 +329,6 @@ def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
     ''''''
-def  cmd_add_tag():
-    ''''''
 def  cmd_sort_files():
     ''''''
 def  cmd_find_contact():
@@ -303,7 +341,7 @@ book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, cmd_add_tag, book.sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
+functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, cmd_del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
@@ -319,3 +357,6 @@ if __name__ == "__main__":
         input_msg = input("Please enter the command: ").lower().strip()
     print("Have a nice day... Good bye!")
     book.save_data(data_file)
+
+    for rec in book.iterator(2):
+        print(rec)
