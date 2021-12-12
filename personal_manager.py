@@ -113,7 +113,8 @@ class Note(Field):
 
     def __str__(self):
         if self.tag:
-            return f"note (created: {self.__created_at}): {self.value}, tags: {'; '.join(self.tag)}"
+            for tag in self.tag:
+                return f"note (created: {self.__created_at}): {self.value}, tags: {tag.value}"
         else:
             return f"note (created: {self.__created_at}): {self.value}"
 
