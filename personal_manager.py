@@ -12,15 +12,15 @@ from pick import pick
 def standard_input():
     yield "add_contact"
     yield "Vasya"
-    yield "165-34-54-221;123-34-567-01;456-12-345-67"
+    yield "067-342-54-22;123-567-01-02;456-123-34-56"
     yield "09.01.1990"
-    yield "Lvivska st., Lviv, 32/56; Kyivska st., Kyiv, 56/42"
+    yield "Lvivska st., Lviv, 32/56;Kyivska st., Kyiv, 56/42"
     yield "This is first note in record;This is second note in record"
     yield "holidays_period"
     yield "30"
     yield "add_tag"
     yield "Vasya"
-    yield "tag-1;tag-2"
+    yield "first;note"
     yield "exit"
 
 
@@ -73,6 +73,7 @@ class Tag(Field):
     @value.setter
     def value(self, value):
         self._value = value
+
 
 class Note(Field):
     """Note class for storage note's field"""
