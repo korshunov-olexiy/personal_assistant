@@ -209,12 +209,8 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name == "phone":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for phone number is \";\": ").split(";")
-            elif obj_name == "address":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for address is \";\": ").split(";")
-            elif obj_name == "note":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for note is \";\": ").split(";")
+            if obj_name == ["phone", "address", "note"]:
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
