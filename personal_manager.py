@@ -209,7 +209,7 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name == ["phone", "address", "note"]:
+            if obj_name in ["phone", "address", "note"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
