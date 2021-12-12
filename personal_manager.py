@@ -81,7 +81,7 @@ class Note(Field):
     def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
         self.tags = []
-        self.__created_at = date.today()
+        self.created_at = date.today()
         if tags:
             for one_tag in tags:
                 self.tags.append(Tag(one_tag))
@@ -89,9 +89,9 @@ class Note(Field):
     def __str__(self):
         if self.tags:
             tags_str = '; '.join(list(map(lambda tag: tag.value, self.tags)))
-            return f"Note: {self.value}, created: {self.__created_at}, Tags: {tags_str}"
+            return f"Note: {self.value}, created: {self.created_at}, tags: {tags_str}"
         else:
-            return f"{self.value}"
+            return f"{self.value}, created: {self.created_at}"
 
 
 class Address(Field):
@@ -363,7 +363,7 @@ class AddressBook(UserDict):
         record = self.find_contact("Please enter contact name for which you want to delete its note")
         print("Notes:\n")
         print_record_notes(record)
-        index = int(input("Please enter note index you want to delete"))
+        index = int(''.join(self.__get_params({"note index you want to delete": ""})))
         if index >= len(record.notes) or index < 0:
             print("Provided index is invalid")
         else:
