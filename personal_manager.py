@@ -277,7 +277,9 @@ class AddressBook(UserDict):
         if self.data.get(value):
             self.data.pop(value)
 
-    def find_info(self, search_info):
+    def find_contact(self):
+        search_info = ''.join(self.__get_params({"search_info": ""}))
+        search_info = search_info.capitalize()
         result = [f"Search results for string \"{search_info}\":"]
         flag_found = False
         for name, rec in self.data.items():
@@ -290,7 +292,7 @@ class AddressBook(UserDict):
                 flag_found = True
         if not flag_found:
             result.append("No information found.")
-        return '\n'.join(result)
+        print('\n'.join(result))
 
     def sort_files(self) -> str:
         return sort_files_entry_point((''.join(self.__get_params({"path": ""}))))
@@ -355,12 +357,11 @@ def  cmd_find_contact():
     ''''''
 def  cmd_edit_contact():
     ''''''
-
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
