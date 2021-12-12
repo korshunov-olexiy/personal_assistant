@@ -81,7 +81,7 @@ class Note(Field):
     def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
         self.tags = []
-        self.creation_date = date.today()
+        self.__created_at = date.today()
         if tags:
             for one_tag in tags:
                 self.tags.append(Tag(one_tag))
@@ -89,7 +89,7 @@ class Note(Field):
     def __str__(self):
         if self.tags:
             tags_str = '; '.join(list(map(lambda tag: tag.value, self.tags)))
-            return f"Note: {self.value}, Tags: {tags_str}"
+            return f"Note: {self.value}, created: {self.__created_at}, Tags: {tags_str}"
         else:
             return f"{self.value}"
 
@@ -287,7 +287,9 @@ class AddressBook(UserDict):
         if self.data.get(value):
             self.data.pop(value)
 
-    def find_info(self, search_info):
+    def find_contact(self):
+        search_info = ''.join(self.__get_params({"search_info": ""}))
+        search_info = search_info.capitalize()
         result = [f"Search results for string \"{search_info}\":"]
         flag_found = False
         for name, rec in self.data.items():
@@ -300,7 +302,7 @@ class AddressBook(UserDict):
                 flag_found = True
         if not flag_found:
             result.append("No information found.")
-        return '\n'.join(result)
+        print('\n'.join(result))
 
     def sort_files(self) -> str:
         return sort_files_entry_point((''.join(self.__get_params({"path": ""}))))
@@ -410,7 +412,7 @@ book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
@@ -425,7 +427,7 @@ if __name__ == "__main__":
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
     print("Have a nice day... Good bye!")
-    book.save_data(data_file)
+    # book.save_data(data_file)
 
     for rec in book.iterator(2):
         print(rec)
