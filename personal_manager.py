@@ -12,15 +12,15 @@ from pick import pick
 def standard_input():
     yield "add_contact"
     yield "Vasya"
-    yield "165-34-54-221;123-34-567-01;456-12-345-67"
+    yield "067-342-54-22;123-567-01-02;456-123-34-56"
     yield "09.01.1990"
-    yield "Lvivska st., Lviv, 32/56; Kyivska st., Kyiv, 56/42"
+    yield "Lvivska st., Lviv, 32/56;Kyivska st., Kyiv, 56/42"
     yield "This is first note in record;This is second note in record"
     yield "holidays_period"
     yield "30"
     yield "add_tag"
     yield "Vasya"
-    yield "tag-1;tag-2"
+    yield "first;note"
     yield "exit"
 
 
@@ -64,15 +64,30 @@ class Phone(Field):
         return f"Phone: {self.value}"
 
 
+class Tag(Field):
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+
 class Note(Field):
     """Note class for storage note's field"""
-    def __init__(self, value, tags = ""):
+    def __init__(self, value, created_at: datetime, tags: Optional[List[str]] = None):
         super().__init__(value)
-        self.tags = tags
+        self.__created_at = created_at
+        self.tag = []
+        if tags:
+            for one_tag in tags:
+                self.tag.append(Tag(one_tag))
 
     def __str__(self):
-        if self.tags:
-            return f"Note: {self.value}, Tags: {'; '.join(self.tags)}"
+        if self.tag:
+            return f"note: {self.value}, created: {self.__created_at}, tags: {'; '.join(self.tag)}"
         else:
             return f"{self.value}"
 
@@ -127,7 +142,7 @@ class Record:
             self.birthday = Birthday(birthday)
         self.note = []
         for one_note in note:
-            self.note.append(Note(one_note))
+            self.note.append(Note(one_note, datetime.today()))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
         """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
@@ -181,8 +196,8 @@ class Record:
             result += f", birthday: {self.birthday.value}"
             result += f", to birthday: {self.days_to_birthday()}"
         for one_note in self.note:
-            if one_note.tags:
-                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tags)}\""
+            if one_note.tag:
+                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tag)}\""
             else:
                 result += f", note: {one_note.value}"
         return result
@@ -195,12 +210,8 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name == "phone":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for phone number is \";\": ").split(";")
-            elif obj_name == "address":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for address is \";\": ").split(";")
-            elif obj_name == "note":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for note is \";\": ").split(";")
+            if obj_name in ["phone", "address", "note"]:
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
@@ -214,13 +225,13 @@ class AddressBook(UserDict):
         contact = self.data.get(name_contact)
         if contact:
             note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
-            tags = contact.note[note_index].tags
+            tags = contact.note[note_index].tag
             if tags:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {tags}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags.extend(tags)
+                contact.note[note_index].tag.extend(tags)
             else:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags = tags
+                contact.note[note_index].tag = tags
         else:
             print(f"The user {name_contact} was not found in the address book.")
 
@@ -333,14 +344,16 @@ class CommandHandler:
 
 
 def  cmd_save_note():
-    ''''''
+     ''''''
 def  cmd_edit_note():
     ''''''
 def  cmd_del_note():
-    ''''''
+     ''''''
 def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
+    ''''''
+def  cmd_find_contact():
     ''''''
 def  cmd_edit_contact():
     ''''''
@@ -363,7 +376,7 @@ if __name__ == "__main__":
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
     print("Have a nice day... Good bye!")
-    book.save_data(data_file)
+    # book.save_data(data_file)
 
     for rec in book.iterator(2):
         print(rec)
