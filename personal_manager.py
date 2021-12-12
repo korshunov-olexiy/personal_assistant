@@ -3,7 +3,6 @@ import re
 from collections import UserDict
 from datetime import datetime, timedelta, date
 from difflib import get_close_matches
-from operator import itemgetter
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
 from sort_files import sort_files_entry_point
@@ -17,11 +16,23 @@ def standard_input():
     yield "09.01.1990"
     yield "Lvivska st., Lviv, 32/56;Kyivska st., Kyiv, 56/42"
     yield "This is first note in record;This is second note in record"
+    yield "add_contact"
+    yield "Petya"
+    yield "066-142-44-11;096-342-33-76;044-322-11-43"
+    yield "23.11.2003"
+    yield "Orlova st., Lviv, 22/134;Uzviz st., Kyiv, 156/24"
+    yield "I'll be in Lviv for a coffee.;I will be in Kiev, I will go to Khreshchatyk."
     yield "holidays_period"
     yield "30"
     yield "add_tag"
     yield "Vasya"
-    yield "first;note"
+    yield "tag-1;tag-2"
+    yield "add_tag"
+    yield "Vasya"
+    yield "tag-3;tag-4"
+    yield "add_tag"
+    yield "Petya"
+    yield "coffee;Khreshchatyk"
     yield "exit"
 
 
@@ -66,6 +77,7 @@ class Phone(Field):
 
 
 class Tag(Field):
+    """Tag class for storage tag's field"""
 
     @property
     def value(self):
@@ -80,18 +92,17 @@ class Note(Field):
     """Note class for storage note's field"""
     def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
-        self.tags = []
-        self.created_at = date.today()
+        self.__created_at = datetime.today()
+        self.tag = []
         if tags:
             for one_tag in tags:
-                self.tags.append(Tag(one_tag))
+                self.tag.append(Tag(one_tag))
 
     def __str__(self):
-        if self.tags:
-            tags_str = '; '.join(list(map(lambda tag: tag.value, self.tags)))
-            return f"Note: {self.value}, created: {self.created_at}, tags: {tags_str}"
+        if self.tag:
+            return f"note (created: {self.__created_at}): {self.value}, tags: {'; '.join(self.tag)}"
         else:
-            return f"{self.value}, created: {self.created_at}"
+            return f"note (created: {self.__created_at}): {self.value}"
 
 
 class Address(Field):
@@ -142,10 +153,9 @@ class Record:
             self.address.append(Address(one_address))
         if birthday:
             self.birthday = Birthday(birthday)
-        self.notes = []
+        self.note = []
         for one_note in note:
-            if one_note != "":
-                self.notes.append(Note(one_note))
+            self.note.append(Note(one_note))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
         """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
@@ -192,17 +202,16 @@ class Record:
     def __str__(self):
         result = f"Record of {self.name.value}"
         if self.phone:
-            result += f", phones: {'; '.join([one_phone.value for one_phone in self.phone])}"
+            for one_phone in self.phone:
+                result += f": {one_phone}"
         if self.address:
-            result += f", address: {'; '.join([one_address.value for one_address in self.address])}"
+            for one_address in self.address:
+                result += f", {one_address}"
         if self.birthday.value:
-            result += f", birthday: {self.birthday.value}"
-            result += f", to birthday: {self.days_to_birthday()}"
-        for one_note in self.notes:
-            if one_note.tags:
-                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tags)}\""
-            else:
-                result += f", note: {one_note.value}"
+            result += f", Birthday: {self.birthday.value}"
+            result += f", From current date to birthday: {self.days_to_birthday()} day(s)"
+        for one_note in self.note:
+            result += f", {one_note}"
         return result
 
 
@@ -427,7 +436,7 @@ if __name__ == "__main__":
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
     print("Have a nice day... Good bye!")
-    # book.save_data(data_file)
+    book.save_data(data_file)
 
     for rec in book.iterator(2):
         print(rec)
