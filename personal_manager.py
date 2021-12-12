@@ -1,8 +1,9 @@
 import pickle
 import re
 from collections import UserDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from difflib import get_close_matches
+from operator import itemgetter
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
 from sort_files import sort_files_entry_point
@@ -80,13 +81,15 @@ class Note(Field):
     def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
         self.tags = []
+        self.creation_date = date.today()
         if tags:
             for one_tag in tags:
                 self.tags.append(Tag(one_tag))
 
     def __str__(self):
         if self.tags:
-            return f"Note: {self.value}, Tags: {'; '.join(self.tags)}"
+            tags_str = '; '.join(list(map(lambda tag: tag.value, self.tags)))
+            return f"Note: {self.value}, Tags: {tags_str}"
         else:
             return f"{self.value}"
 
@@ -126,7 +129,7 @@ class Record:
     """Record class responsible for the logic of adding/removing/editing fields
     Only one name but many phone numbers"""
 
-    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[List[str]] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
+    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[str] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
         self.name = Name(name)
         self.phone = []
         for one_phone in phone:
@@ -210,25 +213,24 @@ def print_record_notes(record: Record):
         else:
             for index, note in enumerate(record.notes):
                 print(f"[{index}] {note}")
-            print("\n")
 
 
 class AddressBook(UserDict):
-    """Add new instance of Record class in AddressBook"""
+    """Add new instance of Record class in AddressBook"""\
 
     def __get_params(self, params: Dict[str,str]) -> List[str]:
         msg = "Please enter the "
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name in ["phone", "address", "note"]:
+            if obj_name in ["phone", "address", "notes", "tags"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
 
     def add_record(self) -> None:
-        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "note": ""}))
+        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "notes": ""}))
         self.data[new_record.name.value] = new_record
 
     def add_tags(self) -> None:
@@ -280,9 +282,6 @@ class AddressBook(UserDict):
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
 
-    def find_record(self, value: str) -> Optional[Record]:
-        return self.data.get(value.capitalize())
-
     def delete_record(self, value: str) -> None:
         value = value.capitalize()
         if self.data.get(value):
@@ -325,43 +324,41 @@ class AddressBook(UserDict):
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while opening the file \"{filename}\"")
 
-    def _find_contact(self, message: str) -> Optional[Record]:
-        contact_name = input(message)
+    def find_contact(self, message: str) -> Optional[Record]:
+        contact_name = ''.join(self.__get_params({message: ""}))
 
-        record: Optional[Record] = self.find_record(contact_name)
+        record: Optional[Record] = self.data.get(contact_name.capitalize())
         if record is None:
             print("There is no contact with proved name.\n")
 
         return record
 
     def add_note(self):
-        record = self._find_contact("Please enter contact name for which you want to add a note")
+        record = self.find_contact("contact name for which you want to add a note")
 
         if record is not None:
-            note = input(f"Please enter a note you want to add to contact \"{record.name.value}\"")
-            tags = input(f"Please enter add tags you want to add the note. Use \";\" to separate tags.").split(";")
+            note, tags = self.__get_params({"note": "", "tags": ""})
             record.notes.append(Note(note, tags))
             print("Note was added.\n")
 
     def print_notes(self):
-        record = self._find_contact("Please enter contact name for which you want to print its notes")
+        record = self.find_contact("contact name for which you want to print its notes")
         print_record_notes(record)
 
     def edit_note(self):
-        record = self._find_contact("Please enter contact name for which you want to edit its note")
-        print("Notes:\n")
+        record = self.find_contact("contact name for which you want to edit its note")
+        print("Notes:")
         print_record_notes(record)
-        index = int(input("Please enter note index you want to edit"))
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
         if index >= len(record.notes) or index < 0:
             print("Provided index is invalid")
         else:
-            note = input(f"Please enter a note you want to edit")
-            tags = input(f"Please enter add tags you want to add the note. Use \";\" to separate tags.").split(";")
+            note, tags = self.__get_params({"note": "", "tags": ""})
             record.notes[index] = Note(note, tags)
             print("Note was edited.\n")
 
     def del_note(self):
-        record = self._find_contact("Please enter contact name for which you want to delete its note")
+        record = self.find_contact("Please enter contact name for which you want to delete its note")
         print("Notes:\n")
         print_record_notes(record)
         index = int(input("Please enter note index you want to delete"))
@@ -422,6 +419,10 @@ if __name__ == "__main__":
     data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
     book.load_data(data_file)
+
+    new_record = Record("a", ["+123456789090"], "16.1.2141", ["16.1.2141", "1.1.1.2121"], ["16.1.2141", "1.1.1.2121"])
+    book.data[new_record.name.value] = new_record
+
     cmd = CommandHandler()
     #re.sub(r" +", " ", input("Hello, please enter the command: ")
     input_msg = input("Hello, please enter the command: ").lower().strip()
