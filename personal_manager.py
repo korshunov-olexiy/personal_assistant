@@ -77,8 +77,9 @@ class Tag(Field):
 
 class Note(Field):
     """Note class for storage note's field"""
-    def __init__(self, value, tags: Optional[List[str]] = None):
+    def __init__(self, value, created_at: datetime, tags: Optional[List[str]] = None):
         super().__init__(value)
+        self.__created_at = created_at
         self.tag = []
         if tags:
             for one_tag in tags:
@@ -86,7 +87,7 @@ class Note(Field):
 
     def __str__(self):
         if self.tag:
-            return f"Note: {self.value}, Tags: {'; '.join(self.tag)}"
+            return f"note: {self.value}, created: {self.__created_at}, tags: {'; '.join(self.tag)}"
         else:
             return f"{self.value}"
 
@@ -374,7 +375,7 @@ if __name__ == "__main__":
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
     print("Have a nice day... Good bye!")
-    book.save_data(data_file)
+    # book.save_data(data_file)
 
     for rec in book.iterator(2):
         print(rec)
