@@ -12,15 +12,15 @@ from pick import pick
 def standard_input():
     yield "add_contact"
     yield "Vasya"
-    yield "165-34-54-221;123-34-567-01;456-12-345-67"
+    yield "067-342-54-22;123-567-01-02;456-123-34-56"
     yield "09.01.1990"
-    yield "Lvivska st., Lviv, 32/56; Kyivska st., Kyiv, 56/42"
+    yield "Lvivska st., Lviv, 32/56;Kyivska st., Kyiv, 56/42"
     yield "This is first note in record;This is second note in record"
     yield "holidays_period"
     yield "30"
     yield "add_tag"
     yield "Vasya"
-    yield "tag-1;tag-2"
+    yield "first;note"
     yield "exit"
 
 
@@ -64,11 +64,25 @@ class Phone(Field):
         return f"Phone: {self.value}"
 
 
+class Tag(Field):
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+
 class Note(Field):
     """Note class for storage note's field"""
-    def __init__(self, value, tags: List[str] = None):
+    def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
-        self.tags = tags
+        self.tags = []
+        if tags:
+            for one_tag in tags:
+                self.tags.append(Tag(one_tag))
 
     def __str__(self):
         if self.tags:
@@ -207,12 +221,8 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name == "phone":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for phone number is \";\": ").split(";")
-            elif obj_name == "address":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for address is \";\": ").split(";")
-            elif obj_name == "note":
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for note is \";\": ").split(";")
+            if obj_name in ["phone", "address", "note"]:
+                params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
@@ -226,13 +236,13 @@ class AddressBook(UserDict):
         contact = self.data.get(name_contact)
         if contact:
             note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
-            tags = contact.note[note_index].tags
+            tags = contact.note[note_index].tag
             if tags:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {tags}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags.extend(tags)
+                contact.note[note_index].tag.extend(tags)
             else:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags = tags
+                contact.note[note_index].tag = tags
         else:
             print(f"The user {name_contact} was not found in the address book.")
 
@@ -392,8 +402,6 @@ class CommandHandler:
 def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
-    ''''''
-def  cmd_sort_files():
     ''''''
 def  cmd_find_contact():
     ''''''
