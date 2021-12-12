@@ -1,7 +1,7 @@
 import pickle
 import re
 from collections import UserDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from difflib import get_close_matches
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple
@@ -140,7 +140,7 @@ class Record:
     """Record class responsible for the logic of adding/removing/editing fields
     Only one name but many phone numbers"""
 
-    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[List[str]] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
+    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[str] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
         self.name = Name(name)
         self.phone = []
         for one_phone in phone:
@@ -214,22 +214,32 @@ class Record:
             result += f", {one_note}"
         return result
 
+
+def print_record_notes(record: Record):
+    if record is not None:
+        if len(record.notes) == 0:
+            print("There is no notes for this contact\n")
+        else:
+            for index, note in enumerate(record.notes):
+                print(f"[{index}] {note}")
+
+
 class AddressBook(UserDict):
-    """Add new instance of Record class in AddressBook"""
+    """Add new instance of Record class in AddressBook"""\
 
     def __get_params(self, params: Dict[str,str]) -> List[str]:
         msg = "Please enter the "
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name in ["phone", "address", "note"]:
+            if obj_name in ["phone", "address", "notes", "tags"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
 
     def add_record(self) -> None:
-        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "note": ""}))
+        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "notes": ""}))
         self.data[new_record.name.value] = new_record
 
     def add_tags(self) -> None:
@@ -281,9 +291,6 @@ class AddressBook(UserDict):
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
 
-    def find_record(self, value: str) -> Optional[Record]:
-        return self.data.get(value.capitalize())
-
     def delete_record(self, value: str) -> None:
         value = value.capitalize()
         if self.data.get(value):
@@ -328,6 +335,51 @@ class AddressBook(UserDict):
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while opening the file \"{filename}\"")
 
+    def find_contact(self, message: str) -> Optional[Record]:
+        contact_name = ''.join(self.__get_params({message: ""}))
+
+        record: Optional[Record] = self.data.get(contact_name.capitalize())
+        if record is None:
+            print("There is no contact with proved name.\n")
+
+        return record
+
+    def add_note(self):
+        record = self.find_contact("contact name for which you want to add a note")
+
+        if record is not None:
+            note, tags = self.__get_params({"note": "", "tags": ""})
+            record.notes.append(Note(note, tags))
+            print("Note was added.\n")
+
+    def print_notes(self):
+        record = self.find_contact("contact name for which you want to print its notes")
+        print_record_notes(record)
+
+    def edit_note(self):
+        record = self.find_contact("contact name for which you want to edit its note")
+        print("Notes:")
+        print_record_notes(record)
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+        if index >= len(record.notes) or index < 0:
+            print("Provided index is invalid")
+        else:
+            note, tags = self.__get_params({"note": "", "tags": ""})
+            record.notes[index] = Note(note, tags)
+            print("Note was edited.\n")
+
+    def del_note(self):
+        record = self.find_contact("Please enter contact name for which you want to delete its note")
+        print("Notes:\n")
+        print_record_notes(record)
+        index = int(''.join(self.__get_params({"note index you want to delete": ""})))
+        if index >= len(record.notes) or index < 0:
+            print("Provided index is invalid")
+        else:
+            del record.notes[index]
+            print("Note was deleted.\n")
+
+
 
 class CommandHandler:
 
@@ -355,12 +407,6 @@ class CommandHandler:
         return True
 
 
-def  cmd_save_note():
-     ''''''
-def  cmd_edit_note():
-    ''''''
-def  cmd_del_note():
-     ''''''
 def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
@@ -369,11 +415,13 @@ def  cmd_find_contact():
     ''''''
 def  cmd_edit_contact():
     ''''''
+
+
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
