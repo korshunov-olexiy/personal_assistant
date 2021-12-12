@@ -33,6 +33,9 @@ def standard_input():
     yield "add_tag"
     yield "Petya"
     yield "coffee;Khreshchatyk"
+    yield "find_note"
+    yield "Vasya"
+    yield "tag-1"
     yield "exit"
 
 
@@ -92,30 +95,17 @@ class Note(Field):
     """Note class for storage note's field"""
     def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
-        self.__created_at = datetime.today()
+        self._created_at = datetime.today()
         self.tag = []
         if tags:
             for one_tag in tags:
                 self.tag.append(Tag(one_tag))
 
-    def __eq__(self, __o: object) -> bool:
-        return self.__created_at == __o.created_at
-    def __ne__(self, __o: object) -> bool:
-        return self.__created_at != __o.created_at
-    def __lt__(self, __o: object) -> bool:
-        return self.__created_at < __o.created_at
-    def __qt__(self, __o: object) -> bool:
-        return self.__created_at > __o.created_at
-    def __le__(self, __o: object) -> bool:
-        return self.__created_at <= __o.created_at
-    def __ge__(self, __o: object) -> bool:
-        return self.__created_at >= __o.created_at
-
     def __str__(self):
         if self.tag:
-            return f"note (created: {self.__created_at}): {self.value}, tags: {[tag.value for tag in self.tag]}"
+            return f"note (created: {self._created_at}): {self.value}, tags: {self.tag}"
         else:
-            return f"note (created: {self.__created_at}): {self.value}"
+            return f"note (created: {self._created_at}): {self.value}"
 
 
 class Address(Field):
@@ -227,18 +217,8 @@ class Record:
             result += f", {one_note}"
         return result
 
-
-def print_record_notes(record: Record):
-    if record is not None:
-        if len(record.notes) == 0:
-            print("There is no notes for this contact\n")
-        else:
-            for index, note in enumerate(record.notes):
-                print(f"[{index}] {note}")
-
-
 class AddressBook(UserDict):
-    """Add new instance of Record class in AddressBook"""\
+    """Add new instance of Record class in AddressBook"""
 
     def __get_params(self, params: Dict[str,str]) -> List[str]:
         msg = "Please enter the "
@@ -304,11 +284,6 @@ class AddressBook(UserDict):
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
 
-    def delete_record(self, value: str) -> None:
-        value = value.capitalize()
-        if self.data.get(value):
-            self.data.pop(value)
-
     def find_contact(self):
         search_info = ''.join(self.__get_params({"search_info": ""}))
         search_info = search_info.capitalize()
@@ -350,16 +325,21 @@ class AddressBook(UserDict):
 
     def find_contact(self, message: str) -> Optional[Record]:
         contact_name = ''.join(self.__get_params({message: ""}))
-
         record: Optional[Record] = self.data.get(contact_name.capitalize())
         if record is None:
             print("There is no contact with proved name.\n")
-
         return record
+
+    def print_record_notes(self, record: Record) -> None:
+        if record is not None:
+            if len(record.notes) == 0:
+                print("There is no notes for this contact\n")
+            else:
+                for index, note in enumerate(record.notes):
+                    print(f"[{index}] {note}")
 
     def add_note(self):
         record = self.find_contact("contact name for which you want to add a note")
-
         if record is not None:
             note, tags = self.__get_params({"note": "", "tags": ""})
             record.notes.append(Note(note, tags))
@@ -367,12 +347,12 @@ class AddressBook(UserDict):
 
     def print_notes(self):
         record = self.find_contact("contact name for which you want to print its notes")
-        print_record_notes(record)
+        self.print_record_notes(record)
 
     def edit_note(self):
         record = self.find_contact("contact name for which you want to edit its note")
         print("Notes:")
-        print_record_notes(record)
+        self.print_record_notes(record)
         index = int(''.join(self.__get_params({"note index you want to edit": ""})))
         if index >= len(record.notes) or index < 0:
             print("Provided index is invalid")
@@ -384,7 +364,7 @@ class AddressBook(UserDict):
     def del_note(self):
         record = self.find_contact("Please enter contact name for which you want to delete its note")
         print("Notes:\n")
-        print_record_notes(record)
+        self.print_record_notes(record)
         index = int(''.join(self.__get_params({"note index you want to delete": ""})))
         if index >= len(record.notes) or index < 0:
             print("Provided index is invalid")
@@ -392,7 +372,15 @@ class AddressBook(UserDict):
             del record.notes[index]
             print("Note was deleted.\n")
 
-
+    def find_sort_note(self):
+        tag_name = "".join(self.__get_params({"tag name": ""}))
+        for name, rec in self.data.items():
+            filtered_notes = []
+            for note in rec.note:
+                if tag_name in note.tag:
+                    filtered_notes.append(note)
+            for sorted_note in sorted(filtered_notes, key=lambda note: note._created_at, reverse=True):
+                print(sorted_note)
 
 class CommandHandler:
 
@@ -432,9 +420,9 @@ def  cmd_edit_contact():
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
