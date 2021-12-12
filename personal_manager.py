@@ -98,6 +98,19 @@ class Note(Field):
             for one_tag in tags:
                 self.tag.append(Tag(one_tag))
 
+    def __eq__(self, __o: object) -> bool:
+        return self.__created_at == __o.created_at
+    def __ne__(self, __o: object) -> bool:
+        return self.__created_at != __o.created_at
+    def __lt__(self, __o: object) -> bool:
+        return self.__created_at < __o.created_at
+    def __qt__(self, __o: object) -> bool:
+        return self.__created_at > __o.created_at
+    def __le__(self, __o: object) -> bool:
+        return self.__created_at <= __o.created_at
+    def __ge__(self, __o: object) -> bool:
+        return self.__created_at >= __o.created_at
+
     def __str__(self):
         if self.tag:
             return f"note (created: {self.__created_at}): {self.value}, tags: {'; '.join(self.tag)}"
