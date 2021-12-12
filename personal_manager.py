@@ -66,7 +66,7 @@ class Phone(Field):
 
 class Note(Field):
     """Note class for storage note's field"""
-    def __init__(self, value, tags = ""):
+    def __init__(self, value, tags: List[str] = None):
         super().__init__(value)
         self.tags = tags
 
@@ -125,9 +125,10 @@ class Record:
             self.address.append(Address(one_address))
         if birthday:
             self.birthday = Birthday(birthday)
-        self.note = []
+        self.notes = []
         for one_note in note:
-            self.note.append(Note(one_note))
+            if one_note != "":
+                self.notes.append(Note(one_note))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
         """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
@@ -180,12 +181,23 @@ class Record:
         if self.birthday.value:
             result += f", birthday: {self.birthday.value}"
             result += f", to birthday: {self.days_to_birthday()}"
-        for one_note in self.note:
+        for one_note in self.notes:
             if one_note.tags:
                 result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tags)}\""
             else:
                 result += f", note: {one_note.value}"
         return result
+
+
+def print_record_notes(record: Record):
+    if record is not None:
+        if len(record.notes) == 0:
+            print("There is no notes for this contact\n")
+        else:
+            for index, note in enumerate(record.notes):
+                print(f"[{index}] {note}")
+            print("\n")
+
 
 class AddressBook(UserDict):
     """Add new instance of Record class in AddressBook"""
@@ -303,6 +315,53 @@ class AddressBook(UserDict):
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while opening the file \"{filename}\"")
 
+    def _find_contact(self, message: str) -> Optional[Record]:
+        contact_name = input(message)
+
+        record: Optional[Record] = self.find_record(contact_name)
+        if record is None:
+            print("There is no contact with proved name.\n")
+
+        return record
+
+    def add_note(self):
+        record = self._find_contact("Please enter contact name for which you want to add a note")
+
+        if record is not None:
+            note = input(f"Please enter a note you want to add to contact \"{record.name.value}\"")
+            tags = input(f"Please enter add tags you want to add the note. Use \";\" to separate tags.").split(";")
+            record.notes.append(Note(note, tags))
+            print("Note was added.\n")
+
+    def print_notes(self):
+        record = self._find_contact("Please enter contact name for which you want to print its notes")
+        print_record_notes(record)
+
+    def edit_note(self):
+        record = self._find_contact("Please enter contact name for which you want to edit its note")
+        print("Notes:\n")
+        print_record_notes(record)
+        index = int(input("Please enter note index you want to edit"))
+        if index >= len(record.notes) or index < 0:
+            print("Provided index is invalid")
+        else:
+            note = input(f"Please enter a note you want to edit")
+            tags = input(f"Please enter add tags you want to add the note. Use \";\" to separate tags.").split(";")
+            record.notes[index] = Note(note, tags)
+            print("Note was edited.\n")
+
+    def del_note(self):
+        record = self._find_contact("Please enter contact name for which you want to delete its note")
+        print("Notes:\n")
+        print_record_notes(record)
+        index = int(input("Please enter note index you want to delete"))
+        if index >= len(record.notes) or index < 0:
+            print("Provided index is invalid")
+        else:
+            del record.notes[index]
+            print("Note was deleted.\n")
+
+
 
 class CommandHandler:
 
@@ -330,12 +389,6 @@ class CommandHandler:
         return True
 
 
-def  cmd_save_note():
-    ''''''
-def  cmd_edit_note():
-    ''''''
-def  cmd_del_note():
-    ''''''
 def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
@@ -347,11 +400,12 @@ def  cmd_find_contact():
 def  cmd_edit_contact():
     ''''''
 
+
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["add_contact", "holidays_period", "save_note ", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "sort_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, cmd_save_note, cmd_edit_note, cmd_del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, cmd_sort_note, cmd_find_note, book.add_tags, book.sort_files, cmd_find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 
 if __name__ == "__main__":
