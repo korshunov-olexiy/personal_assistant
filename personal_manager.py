@@ -64,15 +64,28 @@ class Phone(Field):
         return f"Phone: {self.value}"
 
 
+class Tag(Field):
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
 class Note(Field):
     """Note class for storage note's field"""
-    def __init__(self, value, tags = ""):
+    def __init__(self, value, tags: Optional[List[str]] = None):
         super().__init__(value)
-        self.tags = tags
+        self.tag = []
+        if tags:
+            for one_tag in tags:
+                self.tag.append(Tag(one_tag))
 
     def __str__(self):
-        if self.tags:
-            return f"Note: {self.value}, Tags: {'; '.join(self.tags)}"
+        if self.tag:
+            return f"Note: {self.value}, Tags: {'; '.join(self.tag)}"
         else:
             return f"{self.value}"
 
@@ -181,8 +194,8 @@ class Record:
             result += f", birthday: {self.birthday.value}"
             result += f", to birthday: {self.days_to_birthday()}"
         for one_note in self.note:
-            if one_note.tags:
-                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tags)}\""
+            if one_note.tag:
+                result += f", note: \"{one_note.value}\", tags: \"{', '.join(one_note.tag)}\""
             else:
                 result += f", note: {one_note.value}"
         return result
@@ -214,13 +227,13 @@ class AddressBook(UserDict):
         contact = self.data.get(name_contact)
         if contact:
             note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
-            tags = contact.note[note_index].tags
+            tags = contact.note[note_index].tag
             if tags:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {tags}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags.extend(tags)
+                contact.note[note_index].tag.extend(tags)
             else:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tags = tags
+                contact.note[note_index].tag = tags
         else:
             print(f"The user {name_contact} was not found in the address book.")
 
@@ -320,16 +333,14 @@ class CommandHandler:
 
 
 def  cmd_save_note():
-    ''''''
+     ''''''
 def  cmd_edit_note():
     ''''''
 def  cmd_del_note():
-    ''''''
+     ''''''
 def  cmd_sort_note():
     ''''''
 def  cmd_find_note():
-    ''''''
-def  cmd_sort_files():
     ''''''
 def  cmd_find_contact():
     ''''''
