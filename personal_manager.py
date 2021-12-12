@@ -419,10 +419,6 @@ if __name__ == "__main__":
     data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
     book.load_data(data_file)
-
-    new_record = Record("a", ["+123456789090"], "16.1.2141", ["16.1.2141", "1.1.1.2121"], ["16.1.2141", "1.1.1.2121"])
-    book.data[new_record.name.value] = new_record
-
     cmd = CommandHandler()
     #re.sub(r" +", " ", input("Hello, please enter the command: ")
     input_msg = input("Hello, please enter the command: ").lower().strip()
