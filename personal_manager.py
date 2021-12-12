@@ -142,7 +142,7 @@ class Record:
             self.birthday = Birthday(birthday)
         self.note = []
         for one_note in note:
-            self.note.append(Note(one_note))
+            self.note.append(Note(one_note, datetime.today()))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
         """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
