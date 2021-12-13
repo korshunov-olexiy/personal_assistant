@@ -100,8 +100,7 @@ class Email(Field):
 
     @value.setter
     def value(self, value):
-        emails = self.__check_email(value)
-        if emails:
+        if self.__check_email(value):
             self._value = value
         else:
             raise InvalidEmailAddress
