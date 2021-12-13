@@ -232,15 +232,51 @@ class AddressBook(UserDict):
         for index in range(len(params)):
             obj_name = params_keys[index]
             """If one of the parameters specified in the array is requested, the input string must be split by the ";" and convert to array."""
-            if obj_name in ["phone", "address", "email", "notes", "tags"]:
+            if obj_name in ["phones", "addresses", "emails", "notes", "tags"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
 
     def add_record(self) -> None:
-        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "email": "", "notes": ""}))
+        new_record = Record(*self.__get_params({"name": "", "phones": "", "birthday": "", "addresses": "", "emails": "", "notes": ""}))
         self.data[new_record.name.value] = new_record
+
+
+    def _edit_name(self, record: Record) -> None:
+        new_name = ''.join(self.__get_params({"new name of user": ""})).strip().capitalize()
+        if new_name:
+            old_name = record.name.value
+            self.data[new_name] = self.data.pop(old_name)
+            record.name.value = new_name
+        else:
+            print("You have not provided a new username.")
+
+    def _edit_phone(self, phones: str) -> None:
+        ''''''
+
+    def _edit_birthday(self, birthday: str) -> None:
+        ''''''
+
+    def _edit_address(self, addresses: str) -> None:
+        ''''''
+
+    def _edit_email(self, emails: str) -> None:
+        ''''''
+
+    def _edit_tag(self, tags: str) -> None:
+        ''''''
+
+    def edit_record(self) -> None:
+        def __exit():
+            return None
+        contact = self._find_contact("contact")
+        if contact:
+            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag, __exit]
+            description_function = ["Edit a name of user", "Edit a phone", "Edit a birthday", "Edit an addresses", "Edit an emails", "Edit a notes", "Edit a tags", "FINISH EDITING"]
+            option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
+            print(f"{option}.\nLet's continue.\n{'='*60}")
+            function_names[index](contact)
 
     def add_tags(self) -> None:
         name_contact = ''.join(self.__get_params({"name of contact": ""})).capitalize()
@@ -430,15 +466,12 @@ class CommandHandler:
         return True
 
 
-def  cmd_edit_contact():
-    print("Sorry, command not implemented :)")
-
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["help", "add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
-description_commands = ["Display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Editing the data of the specified user", "Delete the specified user", "Exit from program"]
+action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+description_commands = ["Display all commands", "Adding a user to the address book", "Edit information of the specified user", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Exit from program"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.show_commands, book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact, exit]
+functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, book.del_contact, exit]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands + [', '.join(exit_commands)], description_commands)]
 
