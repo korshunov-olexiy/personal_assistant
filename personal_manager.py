@@ -362,18 +362,18 @@ class AddressBook(UserDict):
                     print(f"[{index}] {note}")
 
     def add_note(self):
-        record = self.find_contact("contact name for which you want to add a note")
+        record = self.find_contact("contact")
         if record:
             note, tags = self.__get_params({"note": "", "tags": ""})
             record.note.append(Note(note, tags))
             print("Note was added.\n")
 
     def print_notes(self):
-        record = self.find_contact("contact name for which you want to print its notes")
+        record = self.find_contact("contact")
         self.print_record_notes(record)
 
     def edit_note(self):
-        record = self.find_contact("contact name for which you want to edit its note")
+        record = self.find_contact("contact")
         print("Notes:")
         self.print_record_notes(record)
         index = int(''.join(self.__get_params({"note index you want to edit": ""})))
