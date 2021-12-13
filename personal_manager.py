@@ -22,26 +22,38 @@ def standard_input():
     yield "23.11.2003"
     yield "Orlova st., Lviv, 22/134;Uzviz st., Kyiv, 156/24"
     yield "I'll be in Lviv for a coffee.;I will be in Kiev, I will go to Khreshchatyk."
-    yield "holidays_period"
-    yield "30"
-    yield "add_tag"
+    # yield "add_tag"
+    # yield "Vasya"
+    # yield "tag-1;tag-2"
+    # yield "add_tag"
+    # yield "Vasya"
+    # yield "tag-3;tag-4"
+    # yield "add_tag"
+    # yield "Petya"
+    # yield "coffee;Khreshchatyk"
+    yield "print_notes"
     yield "Vasya"
-    yield "tag-1;tag-2"
-    yield "add_tag"
+    yield "add_note"
     yield "Vasya"
-    yield "tag-3;tag-4"
-    yield "add_tag"
-    yield "Petya"
-    yield "coffee;Khreshchatyk"
+    yield "note 340;note 341"
+    yield "340;341;note"
     yield "find_note"
     yield "Vasya"
-    yield "tag-1"
+    yield "340"
+    # yield "holidays_period"
+    # yield "30"
+    # yield "find_note"
+    # yield "Vasya"
+    # yield "tag-1"
     yield "exit"
 
 
 class InvalidPhoneNumber(Exception):
     """Exception for phone number verification."""
 
+
+class InvalidEmailAddress(Exception):
+    """Exception for email verification"""
 
 class Field:
     """Field class is parent for all fields in Record class"""
@@ -103,9 +115,20 @@ class Note(Field):
 
     def __str__(self):
         if self.tag:
-            return f"note (created: {self._created_at}): {self.value}, tags: {self.tag}"
+            return f"note (created: {self._created_at}): {self.value}, tags: {[tag.value for tag in self.tag]}"
         else:
             return f"note (created: {self._created_at}): {self.value}"
+
+
+class Email(Field):
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
 
 
 class Address(Field):
@@ -242,11 +265,11 @@ class AddressBook(UserDict):
             note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
             tags = contact.note[note_index].tag
             if tags:
-                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {tags}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tag.extend(tags)
+                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {[tag.value for tag in tags]}. Separator character for tags is \";\": ").split(";")
             else:
                 tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
-                contact.note[note_index].tag = tags
+            for tag in tags:
+                contact.note[note_index].tag.append(Tag(tag))
         else:
             print(f"The user {name_contact} was not found in the address book.")
 
@@ -331,18 +354,18 @@ class AddressBook(UserDict):
         return record
 
     def print_record_notes(self, record: Record) -> None:
-        if record is not None:
-            if len(record.notes) == 0:
+        if record:
+            if len(record.note) == 0:
                 print("There is no notes for this contact\n")
             else:
-                for index, note in enumerate(record.notes):
+                for index, note in enumerate(record.note):
                     print(f"[{index}] {note}")
 
     def add_note(self):
         record = self.find_contact("contact name for which you want to add a note")
-        if record is not None:
+        if record:
             note, tags = self.__get_params({"note": "", "tags": ""})
-            record.notes.append(Note(note, tags))
+            record.note.append(Note(note, tags))
             print("Note was added.\n")
 
     def print_notes(self):
@@ -354,11 +377,11 @@ class AddressBook(UserDict):
         print("Notes:")
         self.print_record_notes(record)
         index = int(''.join(self.__get_params({"note index you want to edit": ""})))
-        if index >= len(record.notes) or index < 0:
+        if index >= len(record.note) or index < 0:
             print("Provided index is invalid")
         else:
             note, tags = self.__get_params({"note": "", "tags": ""})
-            record.notes[index] = Note(note, tags)
+            record.note[index] = Note(note, tags)
             print("Note was edited.\n")
 
     def del_note(self):
@@ -366,10 +389,10 @@ class AddressBook(UserDict):
         print("Notes:\n")
         self.print_record_notes(record)
         index = int(''.join(self.__get_params({"note index you want to delete": ""})))
-        if index >= len(record.notes) or index < 0:
+        if index >= len(record.note) or index < 0:
             print("Provided index is invalid")
         else:
-            del record.notes[index]
+            del record.note[index]
             print("Note was deleted.\n")
 
     def find_sort_note(self):
@@ -378,13 +401,14 @@ class AddressBook(UserDict):
         for name, rec in self.data.items():
             filtered_notes = []
             for note in rec.note:
-                if tag_name in note.tag:
+                if tag_name in [tag.value for tag in note.tag]:
                     filtered_notes.append(note)
                     found_tag = True
             for sorted_note in sorted(filtered_notes, key=lambda note: note._created_at, reverse=True):
                     print(sorted_note)
         if not found_tag:
             print("Sorry, we could not find notes for the tag you specified.")
+
 
 class CommandHandler:
 
