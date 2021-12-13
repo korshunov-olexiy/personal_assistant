@@ -1,51 +1,14 @@
 import pickle
 import re
 from collections import UserDict
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from difflib import get_close_matches
 from pathlib import Path
-from typing import List, Optional, Dict, Tuple
-from sort_files import sort_files_entry_point
+from typing import Dict, List, Optional
+
 from pick import pick
 
-"""standard_input is used to simulate user input. Use in vscode."""
-def standard_input():
-    yield "add_contact"
-    yield "Vasya"
-    yield "067-342-54-22;123-567-01-02;456-123-34-56"
-    yield "09.01.1990"
-    yield "Lvivska st., Lviv, 32/56;Kyivska st., Kyiv, 56/42"
-    yield "This is first note in record;This is second note in record"
-    yield "add_contact"
-    yield "Petya"
-    yield "066-142-44-11;096-342-33-76;044-322-11-43"
-    yield "23.11.2003"
-    yield "Orlova st., Lviv, 22/134;Uzviz st., Kyiv, 156/24"
-    yield "I'll be in Lviv for a coffee.;I will be in Kiev, I will go to Khreshchatyk."
-    # yield "add_tag"
-    # yield "Vasya"
-    # yield "tag-1;tag-2"
-    # yield "add_tag"
-    # yield "Vasya"
-    # yield "tag-3;tag-4"
-    # yield "add_tag"
-    # yield "Petya"
-    # yield "coffee;Khreshchatyk"
-    yield "print_notes"
-    yield "Vasya"
-    yield "add_note"
-    yield "Vasya"
-    yield "note 340;note 341"
-    yield "340;341;note"
-    yield "find_note"
-    yield "Vasya"
-    yield "340"
-    # yield "holidays_period"
-    # yield "30"
-    # yield "find_note"
-    # yield "Vasya"
-    # yield "tag-1"
-    yield "exit"
+from sort_files import sort_files_entry_point
 
 
 class InvalidPhoneNumber(Exception):
@@ -216,7 +179,7 @@ class Record:
             if birthday < current_date:
                 birthday = birthday.replace(year=birthday.year + 1)
             days = (birthday - current_date).days
-            return f"{days} day(s)"
+            return f"{days}"
         return ""
 
     def add_phone(self, phone_number: str) -> None:
@@ -242,7 +205,7 @@ class Record:
         else:
             print(f"Old phone \"{old_phone}\" not found or new phone \"{new_phone}\" is present")
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = f"Record of {self.name.value}"
         if self.phone:
             for one_phone in self.phone:
@@ -327,7 +290,7 @@ class AddressBook(UserDict):
                 result.append(f"No contacts found with birthdays for the specified period.")
             print('\n'.join(result))
 
-    def find_contact(self):
+    def find_contact(self) -> None:
         search_info = ''.join(self.__get_params({"search info": ""}))
         result = [f"Search results for string \"{search_info}\":"]
         flag_found = False
@@ -382,19 +345,19 @@ class AddressBook(UserDict):
                 for index, note in enumerate(record.note):
                     print(f"[{index}] {note}")
 
-    def add_note(self):
+    def add_note(self) -> None:
         record = self._find_contact("contact to add a note")
         if record:
             note, tags = self.__get_params({"note": "", "tags": ""})
             record.note.append(Note(note, tags))
             print("Note was added.")
 
-    def print_notes(self):
+    def print_notes(self) -> None:
         record = self._find_contact("contact to display")
         if record:
             self.print_record_notes(record)
 
-    def edit_note(self):
+    def edit_note(self) -> None:
         record = self._find_contact("contact to edit")
         if record:
             print("Notes:")
@@ -407,7 +370,7 @@ class AddressBook(UserDict):
                 record.note[index] = Note(note, tags)
                 print("Note was edited.")
 
-    def del_note(self):
+    def del_note(self) -> None:
         record = self._find_contact("contact")
         if record:
             print("Notes:\n")
@@ -419,7 +382,7 @@ class AddressBook(UserDict):
                 del record.note[index]
                 print("Note was deleted.")
 
-    def find_sort_note(self):
+    def find_sort_note(self) -> None:
         found_tag = False
         tag_name = "".join(self.__get_params({"tag name": ""}))
         for name, rec in self.data.items():
@@ -435,7 +398,7 @@ class AddressBook(UserDict):
 
     def show_commands(self) -> None:
         """Displaying commands with the ability to execute them"""
-        
+
         option, index = pick(commands_desc, f"Command name and description. Select a command and it will be executed.\n{'='*60}", indicator="=>")
         print(f"You have chosen a command: {option}.\nLet's continue.\n{'='*60}")
         functions_list[index]()
@@ -473,11 +436,11 @@ def  cmd_edit_contact():
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["help", "add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
-description_commands = ["display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Search for the specified contact by name", "Editing the data of the specified contact", "Delete the specified contact"]
+description_commands = ["Display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified contact by name", "Editing the data of the specified contact", "Delete the specified contact", "Exit from program"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.show_commands, book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.show_commands, book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact, exit]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
-commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands, description_commands)]
+commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands + [', '.join(exit_commands)], description_commands)]
 
 if __name__ == "__main__":
     current_script_path = Path(__file__).absolute()
@@ -486,12 +449,8 @@ if __name__ == "__main__":
     """get data file from current directory"""
     book.load_data(data_file)
     cmd = CommandHandler()
-    #re.sub(r" +", " ", input("Hello, please enter the command: ")
     input_msg = input("Hello, please enter the command: ").lower().strip()
     while cmd(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
-    print("Have a nice day... Good bye!")
     book.save_data(data_file)
-
-    for rec in book.iterator(2):
-        print(rec)
+    print("Have a nice day... Good bye!")
