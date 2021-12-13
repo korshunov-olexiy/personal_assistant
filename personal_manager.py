@@ -328,16 +328,18 @@ class AddressBook(UserDict):
             print('\n'.join(result))
 
     def find_contact(self):
-        search_info = ''.join(self.__get_params({"search_info": ""}))
-        search_info = search_info.capitalize()
+        search_info = ''.join(self.__get_params({"search info": ""}))
+        #search_info = search_info.capitalize()
         result = [f"Search results for string \"{search_info}\":"]
         flag_found = False
         for name, rec in self.data.items():
             phones = [one_phone.value for one_phone in rec.phone]
+            notes = [one_note.value for one_note in rec.note]
             if search_info in phones or \
                     len(list(filter(lambda one_phone: one_phone.startswith(search_info), phones))) or \
                     search_info.capitalize() in name or \
-                    search_info in rec.birthday.value:
+                    search_info in rec.birthday.value or search_info in notes or\
+                    [one_email.value for one_email in rec.email if search_info in one_email.value]:
                 result.append(f"{name}, {rec}")
                 flag_found = True
         if not flag_found:
