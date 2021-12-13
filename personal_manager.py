@@ -87,8 +87,30 @@ class Phone(Field):
         else:
             raise InvalidPhoneNumber
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Phone: {self.value}"
+
+
+class Email(Field):
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        emails = self.__check_email(value)
+        if emails:
+            self._value = value
+        else:
+            raise InvalidEmailAddress
+
+    def __check_email(self, email: str) -> bool:
+        matched = re.match(r"[a-z][a-z|\d._]{1,}@[a-z]{1,}\.\w{2,}", email, re.IGNORECASE)
+        return bool(matched)
+
+    def __str__(self) -> str:
+        return f"Email: {self.value}"
 
 
 class Tag(Field):
@@ -113,22 +135,11 @@ class Note(Field):
             for one_tag in tags:
                 self.tag.append(Tag(one_tag))
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.tag:
             return f"note (created: {self._created_at}): {self.value}, tags: {[tag.value for tag in self.tag]}"
         else:
             return f"note (created: {self._created_at}): {self.value}"
-
-
-class Email(Field):
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = value
 
 
 class Address(Field):
@@ -142,7 +153,7 @@ class Address(Field):
     def value(self, value):
         self._value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Address: {self.value}"
 
 
