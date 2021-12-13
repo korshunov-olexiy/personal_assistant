@@ -92,6 +92,7 @@ class Phone(Field):
 
 
 class Email(Field):
+    """Email class for storage email's field"""
 
     @property
     def value(self):
