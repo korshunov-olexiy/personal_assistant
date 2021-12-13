@@ -431,7 +431,7 @@ class CommandHandler:
 
 
 def  cmd_edit_contact():
-    ''''''
+    print("Sorry, command not implemented :)")
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
