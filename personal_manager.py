@@ -345,7 +345,7 @@ class AddressBook(UserDict):
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while opening the file \"{filename}\"")
 
-    def find_contact(self, message: str) -> Optional[Record]:
+    def _find_contact(self, message: str) -> Optional[Record]:
         name_contact = ''.join(self.__get_params({message: ""})).capitalize()
         record: Optional[Record] = self.data.get(name_contact)
         if record:
@@ -361,19 +361,19 @@ class AddressBook(UserDict):
                     print(f"[{index}] {note}")
 
     def add_note(self):
-        record = self.find_contact("contact")
+        record = self._find_contact("contact to add a note")
         if record:
             note, tags = self.__get_params({"note": "", "tags": ""})
             record.note.append(Note(note, tags))
             print("Note was added.")
 
     def print_notes(self):
-        record = self.find_contact("contact")
+        record = self._find_contact("contact to display")
         if record:
             self.print_record_notes(record)
 
     def edit_note(self):
-        record = self.find_contact("contact")
+        record = self._find_contact("contact to edit")
         if record:
             print("Notes:")
             self.print_record_notes(record)
@@ -386,7 +386,7 @@ class AddressBook(UserDict):
                 print("Note was edited.")
 
     def del_note(self):
-        record = self.find_contact("contact")
+        record = self._find_contact("contact")
         if record:
             print("Notes:\n")
             self.print_record_notes(record)
