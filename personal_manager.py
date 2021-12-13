@@ -177,7 +177,7 @@ class Record:
     """Record class responsible for the logic of adding/removing/editing fields
     Only one name but many phone numbers"""
 
-    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[str] = None, address: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
+    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[str] = None, address: Optional[List[str]] = None, email: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
         self.name = Name(name)
         self.phone = []
         for one_phone in phone:
@@ -188,6 +188,12 @@ class Record:
         self.address = []
         for one_address in address:
             self.address.append(Address(one_address))
+        self.email = []
+        for one_email in email:
+            try:
+                self.email.append(Email(one_email))
+            except InvalidEmailAddress:
+                print(f"The email \"{one_email}\" is invalid. It was not recorded.")
         if birthday:
             self.birthday = Birthday(birthday)
         self.note = []
@@ -244,6 +250,9 @@ class Record:
         if self.address:
             for one_address in self.address:
                 result += f", {one_address}"
+        if self.email:
+            for one_email in self.email:
+                result += f", {one_email}"
         if self.birthday.value:
             result += f", Birthday: {self.birthday.value}"
             result += f", From current date to birthday: {self.days_to_birthday()} day(s)"
@@ -259,14 +268,15 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            if obj_name in ["phone", "address", "notes", "tags"]:
+            """If one of the parameters specified in the array is requested, the input string must be split by the ";" and convert to array."""
+            if obj_name in ["phone", "address", "email", "notes", "tags"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
 
     def add_record(self) -> None:
-        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "notes": ""}))
+        new_record = Record(*self.__get_params({"name": "", "phone": "", "birthday": "", "address": "", "email": "", "notes": ""}))
         self.data[new_record.name.value] = new_record
 
     def add_tags(self) -> None:
