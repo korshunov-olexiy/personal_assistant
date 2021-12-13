@@ -274,13 +274,12 @@ class AddressBook(UserDict):
             print(f"The user {name_contact} was not found in the address book.")
 
     def del_contact(self) -> None:
-        contact = ''.join(self.__get_params({"contact": ""}))
-        contact = contact.capitalize()
-        if self.data.get(contact):
-            self.data.pop(contact)
-            print(f"Contact {contact} was removed!")
+        name_contact = ''.join(self.__get_params({"contact": ""})).capitalize()
+        if self.data.get(name_contact):
+            self.data.pop(name_contact)
+            print(f"Contact {name_contact} was removed!")
         else:
-            print(f"Contact {contact} not found!")
+            print(f"Contact {name_contact} not found!")
 
     def holidays_period(self) -> None:
         result = []
@@ -347,16 +346,16 @@ class AddressBook(UserDict):
             print(f"An error occurred while opening the file \"{filename}\"")
 
     def find_contact(self, message: str) -> Optional[Record]:
-        contact_name = ''.join(self.__get_params({message: ""}))
-        record: Optional[Record] = self.data.get(contact_name.capitalize())
-        if record is None:
-            print("There is no contact with proved name.\n")
-        return record
+        name_contact = ''.join(self.__get_params({message: ""})).capitalize()
+        record: Optional[Record] = self.data.get(name_contact)
+        if record:
+            return record
+        print("There is no contact with proved name.")
 
     def print_record_notes(self, record: Record) -> None:
         if record:
             if len(record.note) == 0:
-                print("There is no notes for this contact\n")
+                print("There is no notes for this contact.")
             else:
                 for index, note in enumerate(record.note):
                     print(f"[{index}] {note}")
@@ -366,34 +365,37 @@ class AddressBook(UserDict):
         if record:
             note, tags = self.__get_params({"note": "", "tags": ""})
             record.note.append(Note(note, tags))
-            print("Note was added.\n")
+            print("Note was added.")
 
     def print_notes(self):
         record = self.find_contact("contact")
-        self.print_record_notes(record)
+        if record:
+            self.print_record_notes(record)
 
     def edit_note(self):
         record = self.find_contact("contact")
-        print("Notes:")
-        self.print_record_notes(record)
-        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
-        if index >= len(record.note) or index < 0:
-            print("Provided index is invalid")
-        else:
-            note, tags = self.__get_params({"note": "", "tags": ""})
-            record.note[index] = Note(note, tags)
-            print("Note was edited.\n")
+        if record:
+            print("Notes:")
+            self.print_record_notes(record)
+            index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+            if index >= len(record.note) or index < 0:
+                print("Provided index is invalid")
+            else:
+                note, tags = self.__get_params({"note": "", "tags": ""})
+                record.note[index] = Note(note, tags)
+                print("Note was edited.")
 
     def del_note(self):
-        record = self.find_contact("Please enter contact name for which you want to delete its note")
-        print("Notes:\n")
-        self.print_record_notes(record)
-        index = int(''.join(self.__get_params({"note index you want to delete": ""})))
-        if index >= len(record.note) or index < 0:
-            print("Provided index is invalid")
-        else:
-            del record.note[index]
-            print("Note was deleted.\n")
+        record = self.find_contact("contact")
+        if record:
+            print("Notes:\n")
+            self.print_record_notes(record)
+            index = int(''.join(self.__get_params({"note index you want to delete": ""})))
+            if index >= len(record.note) or index < 0:
+                print("Provided index is invalid")
+            else:
+                del record.note[index]
+                print("Note was deleted.")
 
     def find_sort_note(self):
         found_tag = False
@@ -436,15 +438,8 @@ class CommandHandler:
         return True
 
 
-def  cmd_sort_note():
-    ''''''
-def  cmd_find_note():
-    ''''''
-def  cmd_find_contact():
-    ''''''
 def  cmd_edit_contact():
     ''''''
-
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
