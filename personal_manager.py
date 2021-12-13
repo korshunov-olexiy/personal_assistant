@@ -433,6 +433,13 @@ class AddressBook(UserDict):
         if not found_tag:
             print("Sorry, we could not find notes for the tag you specified.")
 
+    def show_commands(self) -> None:
+        """Displaying commands with the ability to execute them"""
+        
+        option, index = pick(commands_desc, f"Command name and description. Select a command and it will be executed.\n{'='*60}", indicator="=>")
+        print(f"You have chosen a command: {option}.\nLet's continue.\n{'='*60}")
+        functions_list[index]()
+
 
 class CommandHandler:
 
@@ -465,10 +472,12 @@ def  cmd_edit_contact():
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+action_commands = ["help", "add_contact", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "edit_contact", "del_contact"]
+description_commands = ["display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "display all commands", "Adding a user to the address book", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Search for the specified contact by name", "Editing the data of the specified contact", "Delete the specified contact"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
+functions_list = [book.show_commands, book.add_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, cmd_edit_contact, book.del_contact]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
+commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands, description_commands)]
 
 if __name__ == "__main__":
     current_script_path = Path(__file__).absolute()
