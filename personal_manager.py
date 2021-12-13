@@ -373,14 +373,18 @@ class AddressBook(UserDict):
             print("Note was deleted.\n")
 
     def find_sort_note(self):
+        found_tag = False
         tag_name = "".join(self.__get_params({"tag name": ""}))
         for name, rec in self.data.items():
             filtered_notes = []
             for note in rec.note:
                 if tag_name in note.tag:
                     filtered_notes.append(note)
+                    found_tag = True
             for sorted_note in sorted(filtered_notes, key=lambda note: note._created_at, reverse=True):
-                print(sorted_note)
+                    print(sorted_note)
+        if not found_tag:
+            print("Sorry, we could not find notes for the tag you specified.")
 
 class CommandHandler:
 
