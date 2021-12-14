@@ -1,16 +1,39 @@
-A project to create a console personal assistant with a command line interface.
+Welcome to student project named "Personal Assistant".
+This program is console bot, made by team "Karma Gigantic".
 
-Features of the "Personal Assistant":
+Your personal helper on computer is able to do many things, such as:
 
-1. Save contacts with names, addresses, phone numbers, emails and birthdays to the contact book;
-2. Display a list of contacts who have a birthday after a specified number of days from the current date;
-3. Check the correctness of the entered phone number and email while creating or editing a record and notify the user in case of incorrect input;
-4. Search for contacts from the contact book;
-5. Edit and delete entries from the contact book;
-6. Save notes with text information;
-7. Search for notes;
-8. Edit and delete notes;
-9. Add вЂњtagsвЂќ to notes, keywords describing the topic and subject of the post;
-10. Search and sort notes by keywords (tags);
-11. Sort files in the specified folder by categories (images, documents, videos, etc.).
-12. The bot should analyze the entered text and try to guess what the user wants from it and suggest the closest command to execute.
+1. Save contacts with names, addresses, phone numbers, emails and birthdays to the contacts book;
+2. Show to you contacts, who have birthday in time period which you set;
+3. Checking if entered phone or email are valid;
+4. Searching for contact you need in the contacts book;
+5. Editing and deleting contacts from the contacts book;
+6. Saving notes with text;
+7. Making search through all notes;
+8. Editing and deleting notes;
+9. Adding tags(keywords) to notes;
+10. Searching and sorting notes by tags(keywords);
+11. Sorting files in current folder by categories (images, documents, videos, etc.).
+12. Analyzing user command and suggest the closest match to existing commands.
+
+To use this program, you need simply download setup package with all necessary files from github.
+Package can be installed into system with a console command "python setup.py install". 
+After installation package [NAMEEEEEE] appear in the system. 
+When package has been installed, you can call command [HELPER] in any place from console.
+
+[HELPEEEER] made for communication with user through console commands. 
+If user input command "help" - all possible commands(with descriptions) will be displayed. 
+This bot support commands: 
+"help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note",
+"del_note",  "find_note", "add_tag", "find_contact", "edit_contact", "del_contact", "sort_files".
+All commands are easy and natively understandable.
+
+"sort_files" sorting all files in current folder by few categories:
+images ('JPEG', 'PNG', 'JPG', 'SVG');
+videos ('AVI', 'MP4', 'MOV', 'MKV');
+documents ('DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX');
+music ('MP3', 'OGG', 'WAV', 'AMR');
+archives ('ZIP', 'GZ', 'TAR');
+Unknown extensions.
+
+Enjoy your experience with using personal manager!
