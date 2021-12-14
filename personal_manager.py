@@ -244,6 +244,7 @@ class AddressBook(UserDict):
 
 
     def _edit_name(self, record: Record) -> None:
+        print(f"The following user names are registered in the address book: {[name for name in self.data]}")
         new_name = ''.join(self.__get_params({"new name of user": ""})).strip().capitalize()
         if new_name:
             if not self.data.get(new_name):
@@ -259,7 +260,7 @@ class AddressBook(UserDict):
         ''''''
 
     def _edit_birthday(self, record: Record) -> None:
-        print(f"current birthday of user is: {record.birthday.value}")
+        print(f"Current birthday of user \"{record.name.value}\" is: {record.birthday.value}")
         new_birthday = ''.join(self.__get_params({"birthday of user": ""})).strip()
         if new_birthday:
             record.birthday.value = new_birthday
@@ -276,6 +277,7 @@ class AddressBook(UserDict):
         ''''''
 
     def edit_record(self) -> None:
+        print(f"The following user names are registered in the address book: {[name for name in self.data]}")
         contact = self._find_contact("contact")
         if contact:
             function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
