@@ -259,7 +259,12 @@ class AddressBook(UserDict):
         ''''''
 
     def _edit_birthday(self, record: Record) -> None:
-        ''''''
+        print(f"current birthday of user is: {record.birthday.value}")
+        new_birthday = ''.join(self.__get_params({"birthday of user": ""})).strip()
+        if new_birthday:
+            record.birthday.value = new_birthday
+        else:
+            print("You have not provided a new birthday.")
 
     def _edit_address(self, record: Record) -> None:
         ''''''
