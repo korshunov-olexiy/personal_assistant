@@ -19,22 +19,21 @@ Your personal helper on computer is able to do many things, such as:
 To use this program, you need simply download setup package with all necessary files from github.
 Package can be installed into system with a console command "python setup.py install". 
 After installation package [NAMEEEEEE] appear in the system. 
-When package has been installed, you can call commands "CLEANUP" or "HELPER" in any place from console.
+When package has been installed, you can call command [HELPER] in any place from console.
 
-[CLEANUUUP] sorting all files in current folder by few categories:
+[HELPEEEER] made for communication with user through console commands. 
+If user input command "help" - all possible commands(with descriptions) will be displayed. 
+This bot support commands: 
+"help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note",
+"del_note",  "find_note", "add_tag", "find_contact", "edit_contact", "del_contact", "sort_files".
+All commands are easy and natively understandable.
+
+"sort_files" sorting all files in current folder by few categories:
 images ('JPEG', 'PNG', 'JPG', 'SVG');
 videos ('AVI', 'MP4', 'MOV', 'MKV');
 documents ('DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX');
 music ('MP3', 'OGG', 'WAV', 'AMR');
 archives ('ZIP', 'GZ', 'TAR');
 Unknown extensions.
-Also renaming files into english, and replacing all symbols in their names into "_".
-
-[HELPEEEER] made for communication with user through console commands. 
-If user input command "help" - all possible commands(with descriptions) will be displayed. 
-This bot support commands: 
-"help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note",
-"del_note",  "find_note", "add_tag", "find_contact", "edit_contact", "del_contact".
-All commands are easy and natively understandable.
 
 Enjoy your experience with using personal manager!
