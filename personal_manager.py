@@ -244,11 +244,10 @@ class AddressBook(UserDict):
             self.data[new_record.name.value] = new_record
         else:
             while not hasattr(new_record, "birthday"):
-                birthday_value = ''.join(self.__get_params({"birthday": ""}, "Date of birth not recorded. Please enter the correct date of birth.")).strip()
+                birthday_value = ''.join(self.__get_params({"date of birth": ""}, "Date of birth not recorded. Please enter the correct ")).strip()
                 if birthday_value:
                     new_record.birthday = Birthday(birthday_value)
                     self.data[new_record.name.value] = new_record
-
 
     def _edit_name(self, record: Record) -> None:
         print(f"The following user names are registered in the address book: {[name for name in self.data]}")
