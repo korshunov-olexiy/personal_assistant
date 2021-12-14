@@ -469,6 +469,10 @@ class AddressBook(UserDict):
         if not found_tag:
             print("Sorry, we could not find notes for the tag you specified.")
 
+    def show_contacts(self, items_count: str = 1):
+        for contacts in self.iterator(items_count):
+            print(contacts)
+
     def show_commands(self) -> None:
         """Displaying commands with the ability to execute them"""
 
@@ -505,10 +509,10 @@ class CommandHandler:
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "del_contact"]
-description_commands = ["Display all commands", "Adding a user to the address book", "Edit information of the specified user", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Exit from program"]
+action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "del_contact", "show_contacts"]
+description_commands = ["Display all commands", "Adding a user to the address book", "Edit information of the specified user", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Show all contacts in address book", "Exit from program"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, book.del_contact, exit]
+functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, book.del_contact, book.show_contacts, exit]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands + [', '.join(exit_commands)], description_commands)]
 
