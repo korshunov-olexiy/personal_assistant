@@ -100,9 +100,10 @@ class Note(Field):
 
     def __str__(self) -> str:
         if self.tag:
-            return [self._created_at, self.value, ', '.join([tag.value for tag in self.tag])]
+            return ", ".join([f"created at {str(self._created_at)}:", \
+                self.value, f", tags: {', '.join([tag.value for tag in self.tag])}"])
         else:
-            return [self._created_at, self.value]
+            return f"created at {str(self._created_at)}: {self.value}"
 
 
 class Address(Field):
@@ -143,7 +144,9 @@ class Record:
     """Record class responsible for the logic of adding/removing/editing fields
     Only one name but many phone numbers"""
 
-    def __init__(self, name: str, phone: Optional[List[str]] = None, birthday: Optional[str] = None, address: Optional[List[str]] = None, email: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
+    def __init__(self, name: str, phone: Optional[List[str]] = None,\
+        birthday: Optional[str] = None, address: Optional[List[str]] = None,\
+        email: Optional[List[str]] = None, note: Optional[List[str]] = None) -> None:
         self.name = Name(name)
         self.phone = []
         for one_phone in phone:
@@ -167,7 +170,8 @@ class Record:
             self.note.append(Note(one_note))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
-        """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
+        """The function checks the user"s phone number.
+        If the number is found, it returns its index; otherwise, None is."""
         try:
             return [one_phone.value for one_phone in self.phone].index(check_number)
         except ValueError:
@@ -209,29 +213,13 @@ class Record:
             print(f"Old phone \"{old_phone}\" not found or new phone \"{new_phone}\" is present")
 
     def __str__(self) -> str:
-        # result = f"Record of {self.name.value}"
-        # if self.phone:
-        #     for one_phone in self.phone:
-        #         result += f": {one_phone}"
-        # if self.address:
-        #     for one_address in self.address:
-        #         result += f": {one_address}"
-        # if self.email:
-        #     for one_email in self.email:
-        #         result += f": {one_email}"
-        # if self.birthday.value:
-        #     result += f": Birthday: {self.birthday.value}"
-        #     result += f": From current date to birthday: {self.days_to_birthday()} day(s)"
-        # for one_note in self.note:
-        #     result += f": {one_note}"
-        # return result
         result = []
         for name, obj in self.__dict__.items():
             try:
                 result.append(f"{name.upper():<10}: {obj.value}")
             except AttributeError:
                 for val in obj:
-                    result.append(f"{name.upper():<10}: {val.value}")
+                    result.append(f"{name.upper():<10}: {val}")
         return "\n".join(result)
 
 
@@ -243,7 +231,8 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            """If one of the parameters specified in the array is requested, the input string must be split by the ";" and convert to array."""
+            """If one of the parameters specified in the array is requested,
+            the input string must be split by the ";" and convert to array."""
             if obj_name in ["phones", "addresses", "emails", "notes", "tags"]:
                 params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
             else:
@@ -257,7 +246,8 @@ class AddressBook(UserDict):
             if name_value:
                 new_record.name.value = name_value
         while not hasattr(new_record, "birthday") or not new_record.birthday.value:
-            birthday_value = ''.join(self.__get_params({"date of birth": ""}, "Date of birth not recorded. Please enter the correct ")).strip()
+            birthday_value = ''.join(self.__get_params({"date of birth": ""}, \
+                "Date of birth not recorded. Please enter the correct ")).strip()
             if birthday_value:
                 new_record.birthday = Birthday(birthday_value)
         self.data[new_record.name.value] = new_record
@@ -276,7 +266,8 @@ class AddressBook(UserDict):
             print("You have not provided a new username.")
 
     def _edit_phone(self, record: Record) -> None:
-        option, index = pick([phone.value for phone in record.phone], "Select the phone number you want to edit.", indicator="=>")
+        option, index = pick([phone.value for phone in record.phone], \
+            "Select the phone number you want to edit.", indicator="=>")
         print(f"You have selected: {option}")
         new_number = ''.join(self.__get_params({"new phone number": ""})).strip()
         if new_number:
@@ -291,22 +282,26 @@ class AddressBook(UserDict):
             print("You have not provided a new birthday.")
 
     def _edit_address(self, record: Record) -> None:
-        option, index = pick([address.value for address in record.address], "Select the address you want to edit.", indicator="=>")
+        option, index = pick([address.value for address in record.address], \
+            "Select the address you want to edit.", indicator="=>")
         print(f"You have selected: {option}")
         new_address = ''.join(self.__get_params({"new address": ""})).strip()
         if new_address:
             record.address[index].value = new_address
 
     def _edit_email(self, record: Record) -> None:
-        option, index = pick([email.value for email in record.email], "Select the email you want to edit.", indicator="=>")
+        option, index = pick([email.value for email in record.email], \
+            "Select the email you want to edit.", indicator="=>")
         print(f"You have selected: {option}")
         new_email = ''.join(self.__get_params({"new email": ""})).strip()
         if new_email:
             record.email[index].value = new_email
 
     def _edit_tag(self, record: Record) -> None:
-        note_option, note_index = pick([note.value for note in record.note], "Select the note for which you want to edit tags.", indicator="=>")
-        print(f"You have selected the note {note_option} which contains the following tags: {[tag.value for tag in record.note[note_index].tag]}")
+        note_option, note_index = pick([note.value for note in record.note], \
+            "Select the note for which you want to edit tags.", indicator="=>")
+        base_msg = f"You have selected the note {note_option} which contains the following tags: "
+        print(f"{base_msg}{[tag.value for tag in record.note[note_index].tag]}")
         new_tags = self.__get_params({"tags": ""})
         if new_tags:
             record.note[note_index].tag = []
@@ -314,16 +309,21 @@ class AddressBook(UserDict):
                 record.note[note_index].tag.append(Tag(new_tag))
 
     def edit_record(self) -> None:
-        option = pick([name for name in self.data], "Select the name of the user whose data you want to edit.", indicator="=>")[0]
+        option = pick([name for name in self.data], \
+            "Select the name of the user whose data you want to edit.", indicator="=>")[0]
         contact = self.data.get(option)
         if contact:
-            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
-            description_function = ["Edit a name of user", "Edit a phone", "Edit a birthday", "Edit an addresses", "Edit an emails", "Edit a notes", "Edit a tags", "FINISH EDITING"]
-            option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
+            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, \
+                self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
+            description_function = ["Edit a name of user", "Edit a phone", \
+                "Edit a birthday", "Edit an addresses", "Edit an emails", \
+                "Edit a notes", "Edit a tags", "FINISH EDITING"]
+            base_msg = f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}"
+            option, index = pick(description_function, base_msg, indicator="=>")
             while index != len(description_function)-1:
                 print(f"You have selected an {option}.\nLet's continue.\n{'='*60}")
                 function_names[index](contact)
-                option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
+                option, index = pick(description_function, base_msg, indicator="=>")
 
     def add_tags(self) -> None:
         name_contact = ''.join(self.__get_params({"name of contact": ""})).capitalize()
@@ -331,10 +331,13 @@ class AddressBook(UserDict):
         if contact:
             note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
             tags = contact.note[note_index].tag
+            base_msg = f"Specify the tags that you want to add to the selected note by {name_contact}. "
+            end_msg = f"Separator character for tags is \";\": "
             if tags:
-                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {[tag.value for tag in tags]}. Separator character for tags is \";\": ").split(";")
+                middle_msg = f"This note already contains the following tags: {[tag.value for tag in tags]}. "
+                tags = input(f"{base_msg}{middle_msg}{end_msg}").split(";")
             else:
-                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
+                tags = input(f"{base_msg}{end_msg}").split(";")
             for tag in tags:
                 contact.note[note_index].tag.append(Tag(tag))
         else:
@@ -396,7 +399,8 @@ class AddressBook(UserDict):
 
     def iterator(self, n: str = 1) -> List[str]:
         separator, enter = "="*60, "\n"
-        yield from ([f"{separator}: {enter}{rec}" for name, rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
+        yield from ([f"{separator}: {enter}{rec}" for name, \
+            rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
 
     def save_data(self, filename: str) -> None:
         try:
@@ -423,11 +427,9 @@ class AddressBook(UserDict):
 
     def print_record_notes(self, record: Record) -> None:
         if record:
-            if len(record.note) == 0:
-                print("There is no notes for this contact.")
-            else:
-                for index, note in enumerate(record.note):
-                    print(f"[{index}] {note}")
+            if record.note:
+                for note in record.note:
+                    print(note)
 
     def add_note(self) -> None:
         record = self._find_contact("contact to add a note")
@@ -446,27 +448,19 @@ class AddressBook(UserDict):
         if not record:
             record = self._find_contact("contact to edit")
         if record:
-            print("Notes:")
-            self.print_record_notes(record)
-            index = int(''.join(self.__get_params({"note index you want to edit": ""})))
-            if index >= len(record.note) or index < 0:
-                print("Provided index is invalid")
-            else:
-                note, tags = self.__get_params({"note": "", "tags": ""})
-                record.note[index] = Note(note, tags)
-                print("Note was edited.")
+            notes = [note.value for note in record.note]
+            index = pick(notes, "Select the note you want to edit.", indicator="=>")[1]
+            note, tags = self.__get_params({"note": "", "tags": ""})
+            record.note[index] = Note(note, tags)
+            print("Note was edited.")
 
     def del_note(self) -> None:
         record = self._find_contact("contact")
         if record:
-            print("Notes:\n")
-            self.print_record_notes(record)
-            index = int(''.join(self.__get_params({"note index you want to delete": ""})))
-            if index >= len(record.note) or index < 0:
-                print("Provided index is invalid")
-            else:
-                del record.note[index]
-                print("Note was deleted.")
+            notes = [note.value for note in record.note]
+            index = pick(notes, "Select the note you want to delete.", indicator="=>")[1]
+            del record.note[index]
+            print("Note was deleted.")
 
     def find_sort_note(self) -> None:
         found_tag = False
@@ -489,7 +483,9 @@ class AddressBook(UserDict):
     def show_commands(self) -> None:
         """Displaying commands with the ability to execute them"""
 
-        option, index = pick(commands_desc, f"Command name and description. Select a command and it will be executed.\n{'='*60}", indicator="=>")
+        option, index = pick(commands_desc, \
+            f"Command name and description. Select a command and it will be executed.\n{'='*60}", \
+            indicator="=>")
         print(f"You have chosen a command: {option}.\nLet's continue.\n{'='*60}")
         functions_list[index]()
 
@@ -497,24 +493,24 @@ class AddressBook(UserDict):
 class CommandHandler:
 
     def __call__(self, command: str) -> bool:
-        cmd = command
-        if cmd in exit_commands:
+        #command = command
+        if command in exit_commands:
             return False
-        elif cmd in action_commands:
-            commands_func[cmd]()
+        elif command in action_commands:
+            commands_func[command]()
             return True
-        cmd = get_close_matches(cmd, action_commands + exit_commands)
-        in_exit = not set(cmd).isdisjoint(exit_commands)
+        command = get_close_matches(command, action_commands + exit_commands)
+        in_exit = not set(command).isdisjoint(exit_commands)
         if in_exit:
             return False
-        in_action = not set(cmd).isdisjoint(action_commands)
+        in_action = not set(command).isdisjoint(action_commands)
         if in_action:
-            if len(cmd) == 1:
-                commands_func[cmd[0]]()
-            elif len(cmd) > 1:
-                cmd = pick(cmd, TITLE, indicator="=>")[0]
-                print(f"You have selected the {cmd} command. Let's continue.")
-                commands_func[cmd]()
+            if len(command) == 1:
+                commands_func[command[0]]()
+            elif len(command) > 1:
+                command = pick(command, TITLE, indicator="=>")[0]
+                print(f"You have selected the {command} command. Let's continue.")
+                commands_func[command]()
         else:
             print("Sorry, I could not recognize the entered command!")
         return True
@@ -522,10 +518,19 @@ class CommandHandler:
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
-action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "del_contact", "show_contacts"]
-description_commands = ["Display all commands", "Adding a user to the address book", "Edit information of the specified user", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Show all contacts in address book", "Exit from program"]
+action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", \
+    "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "del_contact", "show_contacts"]
+description_commands = ["Display all commands", "Adding a user to the address book", \
+    "Edit information of the specified user", "The number of days from today where we are looking for birthdays", \
+    "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", \
+    "Delete the notes of the specified user", "Search for the notes of the specified user", \
+    "Add tag for the specified user", "Sorts files in the specified directory", \
+    "Search for the specified user by name", "Delete the specified user", \
+    "Show all contacts in address book", "Exit from program"]
 exit_commands = ["good_bye", "close", "exit"]
-functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, book.del_contact, book.show_contacts, exit]
+functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, \
+    book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, \
+    book.sort_files, book.find_contact, book.del_contact, book.show_contacts, exit]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
 commands_desc = [f"{cmd:<15} -  {desc}" for cmd, desc in zip(action_commands + [', '.join(exit_commands)], description_commands)]
 
@@ -535,9 +540,9 @@ if __name__ == "__main__":
     data_file = current_script_path.parent.joinpath(file_bin_name)
     """get data file from current directory"""
     book.load_data(data_file)
-    cmd = CommandHandler()
+    command = CommandHandler()
     input_msg = input("Hello, please enter the command: ").lower().strip()
-    while cmd(input_msg):
+    while command(input_msg):
         input_msg = input("Please enter the command: ").lower().strip()
     book.save_data(data_file)
     print("Have a nice day... Good bye!")
