@@ -12,20 +12,21 @@ from sort_files import sort_files_entry_point
 
 
 class InvalidPhoneNumber(Exception):
-    """Exception for phone number verification."""
+    """Exception in case of incorrect phone number input"""
 
 
 class InvalidEmailAddress(Exception):
-    """Exception for email verification"""
+    """Exception in case of incorrect E-mail input"""
+
 
 class Field:
-    """Field class is parent for all fields in Record class"""
+    """Field class is a parent for all fields in Record class"""
     def __init__(self, value):
         self.value = value
 
 
 class Name(Field):
-    """Name class for storage name"s field"""
+    """Name class for storage name's field"""
 
     @property
     def value(self):
@@ -37,7 +38,7 @@ class Name(Field):
 
 
 class Phone(Field):
-    """Phone class for storage phone"s field"""
+    """Phone class for storage phone's field"""
 
     @property
     def value(self):
@@ -121,7 +122,7 @@ class Address(Field):
 
 
 class Birthday(Field):
-    """Birthday class for storage birthday"s field"""
+    """Birthday class for storage birthday's field"""
 
     @property
     def value(self):
@@ -132,7 +133,7 @@ class Birthday(Field):
         try:
             self._value = datetime.strptime(value, "%d.%m.%Y").strftime("%d.%m.%Y")
         except ValueError:
-            print(f"Date of birth \"{value}\" is indicated incorrectly. It was not recorded.")
+            print(f" \"{value}\" --> Incorrect input format. Record can’t be made.")
             self._value = ''
 
     def __str__(self) -> str:
@@ -150,7 +151,7 @@ class Record:
             try:
                 self.phone.append(Phone(one_phone))
             except InvalidPhoneNumber:
-                print(f"The phone number \"{one_phone}\" is invalid. It was not recorded.")
+                print(f"The phone number \"{one_phone}\" is invalid. Record can’t be made.")
         self.address = []
         for one_address in address:
             self.address.append(Address(one_address))
@@ -159,7 +160,7 @@ class Record:
             try:
                 self.email.append(Email(one_email))
             except InvalidEmailAddress:
-                print(f"The email \"{one_email}\" is invalid. It was not recorded.")
+                print(f"The email \"{one_email}\" is invalid. Record can’t be made.")
         if birthday:
             self.birthday = Birthday(birthday)
         self.note = []
@@ -167,14 +168,14 @@ class Record:
             self.note.append(Note(one_note))
 
     def get_phone_index(self, check_number: str) -> Optional[int]:
-        """The function checks the user"s phone number. If the number is found, it returns its index; otherwise, None is."""
+        """This function returns phone number's index. If number not found - returns None"""
         try:
             return [one_phone.value for one_phone in self.phone].index(check_number)
         except ValueError:
             return None
 
     def days_to_birthday(self) -> str:
-        """return number of days until the next birthday"""
+        """Returns how many days left till next birthday"""
 
         if self.birthday.value:
             current_date = datetime.today().date()
@@ -182,7 +183,7 @@ class Record:
             if birthday < current_date:
                 birthday = birthday.replace(year=birthday.year + 1)
             days = (birthday - current_date).days
-            return f"{days}"
+            return f"{days} days left till next birthday"
         return ""
 
     def add_phone(self, phone_number: str) -> None:
@@ -206,7 +207,7 @@ class Record:
             except InvalidPhoneNumber:
                 print(f"The phone number {new_phone} is invalid")
         else:
-            print(f"Old phone \"{old_phone}\" not found or new phone \"{new_phone}\" is present")
+            print(f"Old phone \"{old_phone}\" not found or new phone \"{new_phone}\" is already exists")
 
     def __str__(self) -> str:
         # result = f"Record of {self.name.value}"
@@ -243,9 +244,10 @@ class AddressBook(UserDict):
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
-            """If one of the parameters specified in the array is requested, the input string must be split by the ";" and convert to array."""
+            """If one of the parameters specified in the array is requested, 
+            the input string must be split by the ";" and convert to array."""
             if obj_name in ["phones", "addresses", "emails", "notes", "tags"]:
-                params[obj_name] = input(f"{msg}{obj_name}. Separator character for {obj_name} is \";\": ").split(";")
+                params[obj_name] = input(f"{msg}{obj_name}. Separator symbol for {obj_name} is \";\": ").split(";")
             else:
                 params[obj_name] = input(f"{msg}{obj_name}: ")
         return params.values()
@@ -253,7 +255,7 @@ class AddressBook(UserDict):
     def add_record(self) -> None:
         new_record = Record(*self.__get_params({"name": "", "phones": "", "birthday": "", "addresses": "", "emails": "", "notes": ""}))
         while not new_record.name.value:
-            name_value = ''.join(self.__get_params({"name": ""}, "Username not recorded. Please enter the ")).strip()
+            name_value = ''.join(self.__get_params({"name": ""}, "Username not recorded. Please, enter the ")).strip()
             if name_value:
                 new_record.name.value = name_value
         while not hasattr(new_record, "birthday") or not new_record.birthday.value:
@@ -318,10 +320,10 @@ class AddressBook(UserDict):
         contact = self.data.get(option)
         if contact:
             function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
-            description_function = ["Edit a name of user", "Edit a phone", "Edit a birthday", "Edit an addresses", "Edit an emails", "Edit a notes", "Edit a tags", "FINISH EDITING"]
+            description_function = ["Edit user name", "Edit phone", "Edit birthday", "Edit addresses", "Edit email", "Edit notes", "Edit tags", "FINISH EDITING"]
             option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
             while index != len(description_function)-1:
-                print(f"You have selected an {option}.\nLet's continue.\n{'='*60}")
+                print(f"You have selected an {option} option.\nLet's continue.\n{'='*60}")
                 function_names[index](contact)
                 option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
 
@@ -329,12 +331,12 @@ class AddressBook(UserDict):
         name_contact = ''.join(self.__get_params({"name of contact": ""})).capitalize()
         contact = self.data.get(name_contact)
         if contact:
-            note_index = pick([note.value for note in contact.note], "Select the note where you want add tags:", indicator="=>")[1]
+            note_index = pick([note.value for note in contact.note], "Select the note where you want to add tags:", indicator="=>")[1]
             tags = contact.note[note_index].tag
             if tags:
-                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. This note already contains the following tags: {[tag.value for tag in tags]}. Separator character for tags is \";\": ").split(";")
+                tags = input(f"Specify tags you want to add for the selected note by {name_contact}. This note already contains the following tags: {[tag.value for tag in tags]}. Separator symbol for tags is \";\": ").split(";")
             else:
-                tags = input(f"Specify the tags that you want to add to the selected note by {name_contact}. Separator character for tags is \";\": ").split(";")
+                tags = input(f"Specify tags you want to add for the selected note by {name_contact}. Separator symbol for tags is \";\": ").split(";")
             for tag in tags:
                 contact.note[note_index].tag.append(Tag(tag))
         else:
@@ -360,7 +362,7 @@ class AddressBook(UserDict):
             day_today = datetime.now()
             day_today_year = day_today.year
             end_period = day_today + timedelta(days=period+1)
-            print(f"Search results for birthdays for a period of {period} days:")
+            print(f"Found birthdays for {period} days period: ")
             for name, rec in self.data.items():
                 date = datetime.strptime(rec.birthday.value, '%d.%m.%Y').replace(year=end_period.year)
                 if day_today_year < end_period.year:
@@ -370,12 +372,12 @@ class AddressBook(UserDict):
                     if day_today <= date.replace(year=day_today_year) <= end_period:
                         result.append(f"{name}: {rec}")
             if not result:
-                result.append(f"No contacts found with birthdays for the specified period.")
+                result.append(f"No contacts with birthdays for this period.")
             print('\n'.join(result))
 
     def find_contact(self) -> None:
         search_info = ''.join(self.__get_params({"search info": ""}))
-        result = [f"Search results for string \"{search_info}\":"]
+        result = [f"Search results for string \"{search_info}\": "]
         flag_found = False
         for name, rec in self.data.items():
             phones = [one_phone.value for one_phone in rec.phone]
@@ -402,7 +404,7 @@ class AddressBook(UserDict):
         try:
             with open(filename, "wb") as fn:
                 pickle.dump(self.data, fn)
-            print(f"Saving to file \"{filename}\" is successfully")
+            print(f"Saving to file \"{filename}\" is successful")
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while saving the file \"{filename}\"")
 
@@ -410,7 +412,7 @@ class AddressBook(UserDict):
         try:
             with open(filename, 'rb') as fn:
                 self.data = pickle.load(fn)
-            print(f"Loading from file \"{filename}\" is successfully")
+            print(f"Loading from file \"{filename}\" is successful")
         except (FileNotFoundError, AttributeError, MemoryError):
             print(f"An error occurred while opening the file \"{filename}\"")
 
@@ -419,12 +421,12 @@ class AddressBook(UserDict):
         record: Optional[Record] = self.data.get(name_contact)
         if record:
             return record
-        print("There is no contact with proved name.")
+        print("There is no contact with provided name.")
 
     def print_record_notes(self, record: Record) -> None:
         if record:
             if len(record.note) == 0:
-                print("There is no notes for this contact.")
+                print("There are no any notes for this contact.")
             else:
                 for index, note in enumerate(record.note):
                     print(f"[{index}] {note}")
@@ -446,7 +448,7 @@ class AddressBook(UserDict):
         if not record:
             record = self._find_contact("contact to edit")
         if record:
-            print("Notes:")
+            print("Notes: ")
             self.print_record_notes(record)
             index = int(''.join(self.__get_params({"note index you want to edit": ""})))
             if index >= len(record.note) or index < 0:
@@ -478,7 +480,7 @@ class AddressBook(UserDict):
                     filtered_notes.append(note)
                     found_tag = True
             for sorted_note in sorted(filtered_notes, key=lambda note: note._created_at, reverse=True):
-                    print(sorted_note)
+                print(sorted_note)
         if not found_tag:
             print("Sorry, we could not find notes for the tag you specified.")
 
@@ -489,7 +491,7 @@ class AddressBook(UserDict):
     def show_commands(self) -> None:
         """Displaying commands with the ability to execute them"""
 
-        option, index = pick(commands_desc, f"Command name and description. Select a command and it will be executed.\n{'='*60}", indicator="=>")
+        option, index = pick(commands_desc, f"Command name and description. Select command.\n{'='*60}", indicator="=>")
         print(f"You have chosen a command: {option}.\nLet's continue.\n{'='*60}")
         functions_list[index]()
 
@@ -516,14 +518,14 @@ class CommandHandler:
                 print(f"You have selected the {cmd} command. Let's continue.")
                 commands_func[cmd]()
         else:
-            print("Sorry, I could not recognize the entered command!")
+            print("Sorry, I could not recognize this command!")
         return True
 
 
 book = AddressBook()
 TITLE = "We have chosen several options from the command you provided.\nPlease choose the one that you need."
 action_commands = ["help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note", "del_note", "find_note", "add_tag", "sort_files", "find_contact", "del_contact", "show_contacts"]
-description_commands = ["Display all commands", "Adding a user to the address book", "Edit information of the specified user", "The number of days from today where we are looking for birthdays", "Show notes of the specified user", "Add notes to the specified user", "Edit the notes of the specified user", "Delete the notes of the specified user", "Search for the notes of the specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Show all contacts in address book", "Exit from program"]
+description_commands = ["Display all commands", "Add a user to the address book", "Edit information for the specified user", "Amount of days where we are looking for birthdays", "Show notes for the specified user", "Add notes to the specified user", "Edit the notes for the specified user", "Delete the notes for the specified user", "Find notes for specified user", "Add tag for the specified user", "Sorts files in the specified directory", "Search for the specified user by name", "Delete the specified user", "Show all contacts in address book", "Exit from program"]
 exit_commands = ["good_bye", "close", "exit"]
 functions_list = [book.show_commands, book.add_record, book.edit_record, book.holidays_period, book.print_notes, book.add_note, book.edit_note, book.del_note, book.find_sort_note, book.add_tags, book.sort_files, book.find_contact, book.del_contact, book.show_contacts, exit]
 commands_func = {cmd: func for cmd, func in zip(action_commands, functions_list)}
