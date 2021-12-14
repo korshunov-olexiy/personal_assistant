@@ -226,8 +226,8 @@ class Record:
 class AddressBook(UserDict):
     """Add new instance of Record class in AddressBook"""
 
-    def __get_params(self, params: Dict[str,str]) -> List[str]:
-        msg = "Please enter the "
+    def __get_params(self, params: Dict[str,str], msg: str = None) -> List[str]:
+        msg = "Please enter the " if not msg else msg
         params_keys = list(params.keys())
         for index in range(len(params)):
             obj_name = params_keys[index]
@@ -240,7 +240,14 @@ class AddressBook(UserDict):
 
     def add_record(self) -> None:
         new_record = Record(*self.__get_params({"name": "", "phones": "", "birthday": "", "addresses": "", "emails": "", "notes": ""}))
-        self.data[new_record.name.value] = new_record
+        if hasattr(new_record, "birthday"):
+            self.data[new_record.name.value] = new_record
+        else:
+            while not hasattr(new_record, "birthday"):
+                birthday_value = ''.join(self.__get_params({"birthday": ""}, "Date of birth not recorded. Please enter the correct date of birth.")).strip()
+                if birthday_value:
+                    new_record.birthday = Birthday(birthday_value)
+                    self.data[new_record.name.value] = new_record
 
 
     def _edit_name(self, record: Record) -> None:
