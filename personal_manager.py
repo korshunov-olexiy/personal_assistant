@@ -242,69 +242,88 @@ class AddressBook(UserDict):
         new_record = Record(*self.__get_params({"name": "", "phones": "", "birthday": "", "addresses": "", "emails": "", "notes": ""}))
         self.data[new_record.name.value] = new_record
 
-
     def _edit_name(self, record: Record) -> None:
-        print(f"The following user names are registered in the address book: {[name for name in self.data]}")
         new_name = ''.join(self.__get_params({"new name of user": ""})).strip().capitalize()
         if new_name:
-            if not self.data.get(new_name):
-                old_name = record.name.value
-                self.data[new_name] = self.data.pop(old_name)
-                record.name.value = new_name
-            else:
-                print(f"The username {new_name} is already registered in the address book. Choose something else.")
+            old_name = record.name.value
+            self.data[new_name] = self.data.pop(old_name)
+            record.name.value = new_name
         else:
             print("You have not provided a new username.")
 
     def _edit_phone(self, record: Record) -> None:
-        option, index = pick([phone.value for phone in record.phone], "Select the phone number you want to edit.", indicator="=>")
-        print(f"You have selected: {option}")
-        new_number = ''.join(self.__get_params({"new phone number": ""})).strip()
-        if new_number:
-            record.phone[index].value = new_number
+        for index, phone in enumerate(record.phone):
+            print(f"[{index}] {phone}")
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+        if index >= len(record.phone) or index < 0:
+            print("Provided index is invalid")
+        else:
+            new_phone = ''.join(self.__get_params({"new phone": ""}))
+            record.phone[index] = Phone(new_phone)
+            print("Phone was edited.")
 
     def _edit_birthday(self, record: Record) -> None:
-        print(f"Current birthday of user \"{record.name.value}\" is: {record.birthday.value}")
-        new_birthday = ''.join(self.__get_params({"birthday of user": ""})).strip()
+        new_birthday = ''.join(self.__get_params({"new birthday": ""}))
         if new_birthday:
             record.birthday.value = new_birthday
+            print("birthday was edited.")
         else:
             print("You have not provided a new birthday.")
 
     def _edit_address(self, record: Record) -> None:
-        option, index = pick([address.value for address in record.address], "Select the address you want to edit.", indicator="=>")
-        print(f"You have selected: {option}")
-        new_address = ''.join(self.__get_params({"new address": ""})).strip()
-        if new_address:
-            record.address[index].value = new_address
+        for index, address in enumerate(record.address):
+            print(f"[{index}] {address}")
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+        if index >= len(record.address) or index < 0:
+            print("Provided index is invalid")
+        else:
+            new_address = ''.join(self.__get_params({"new address": ""}))
+            record.address[index] = Address(new_address)
+            print("Address was edited.")
 
     def _edit_email(self, record: Record) -> None:
-        option, index = pick([email.value for email in record.email], "Select the email you want to edit.", indicator="=>")
-        print(f"You have selected: {option}")
-        new_email = ''.join(self.__get_params({"new email": ""})).strip()
-        if new_email:
-            record.email[index].value = new_email
+        for index, email in enumerate(record.email):
+            print(f"[{index}] {email}")
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+        if index >= len(record.email) or index < 0:
+            print("Provided index is invalid")
+        else:
+            new_email = ''.join(self.__get_params({"email": ""}))
+            record.email[index] = Email(new_email)
+            print("Email was edited.")
+
+    def _edit_note(self, record: Record) -> None:
+        self.print_record_notes(record)
+        index = int(''.join(self.__get_params({"note index you want to edit": ""})))
+        if index >= len(record.note) or index < 0:
+            print("Provided index is invalid")
+        else:
+            note, tags = self.__get_params({"note": "", "tags": ""})
+            record.note[index] = Note(note, tags)
+            print("Note was edited.")
 
     def _edit_tag(self, record: Record) -> None:
-        note_option, note_index = pick([note.value for note in record.note], "Select the note for which you want to edit tags.", indicator="=>")
-        print(f"You have selected the note {note_option} which contains the following tags: {[tag.value for tag in record.note[note_index].tag]}")
-        new_tags = self.__get_params({"tags": ""})
-        if new_tags:
-            record.note[note_index].tag = []
-            for new_tag in new_tags:
-                record.note[note_index].tag.append(Tag(new_tag))
+        note_index = pick([note.value for note in record.note], "Select the note where you want add tags:", indicator="=>")[1]
+        tags = record.note[note_index].tag
+        if tags:
+            tag_index = \
+            pick([tag.value for tag in tags], "Select the tag you want to edit:", indicator="=>")[1]
+            new_tag = ''.join(self.__get_params({"tag": ""}))
+            record.note[note_index].tag[tag_index] = Tag(new_tag)
+            print("Tag was edited.")
+        else:
+            print('This note is not haw tags')
 
     def edit_record(self) -> None:
-        option = pick([name for name in self.data], "Select the name of the user whose data you want to edit.", indicator="=>")[0]
-        contact = self.data.get(option)
+        def __exit():
+            return None
+        contact = self._find_contact("contact")
         if contact:
-            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
+            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self._edit_note, self._edit_tag, __exit]
             description_function = ["Edit a name of user", "Edit a phone", "Edit a birthday", "Edit an addresses", "Edit an emails", "Edit a notes", "Edit a tags", "FINISH EDITING"]
             option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
-            while index != len(description_function)-1:
-                print(f"You have selected an {option}.\nLet's continue.\n{'='*60}")
-                function_names[index](contact)
-                option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
+            print(f"{option}.\nLet's continue.\n{'='*60}")
+            function_names[index](contact)
 
     def add_tags(self) -> None:
         name_contact = ''.join(self.__get_params({"name of contact": ""})).capitalize()
@@ -421,10 +440,8 @@ class AddressBook(UserDict):
         if record:
             self.print_record_notes(record)
 
-    def edit_note(self, rec: Optional[Record] = None) -> None:
-        record = rec
-        if not record:
-            record = self._find_contact("contact to edit")
+    def edit_note(self) -> None:
+        record = self._find_contact("contact to edit")
         if record:
             print("Notes:")
             self.print_record_notes(record)
