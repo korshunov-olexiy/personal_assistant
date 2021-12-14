@@ -273,10 +273,10 @@ class AddressBook(UserDict):
     def edit_record(self) -> None:
         contact = self._find_contact("contact")
         if contact:
-            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag, "exit"]
+            function_names = [self._edit_name, self._edit_phone, self._edit_birthday, self._edit_address, self._edit_email, self.edit_note, self._edit_tag]
             description_function = ["Edit a name of user", "Edit a phone", "Edit a birthday", "Edit an addresses", "Edit an emails", "Edit a notes", "Edit a tags", "FINISH EDITING"]
             option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
-            while index != len(function_names)-1:
+            while index != len(description_function)-1:
                 print(f"You have selected an {option}.\nLet's continue.\n{'='*60}")
                 function_names[index](contact)
                 option, index = pick(description_function, f"Select what information for the user {contact.name.value} you would like to change.\n{'='*60}", indicator="=>")
