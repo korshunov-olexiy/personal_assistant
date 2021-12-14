@@ -51,7 +51,7 @@ class Phone(Field):
             raise InvalidPhoneNumber
 
     def __str__(self) -> str:
-        return f"Phone: {self.value}"
+        return self.value
 
 
 class Email(Field):
@@ -73,7 +73,7 @@ class Email(Field):
         return bool(matched)
 
     def __str__(self) -> str:
-        return f"Email: {self.value}"
+        return self.value
 
 
 class Tag(Field):
@@ -100,9 +100,9 @@ class Note(Field):
 
     def __str__(self) -> str:
         if self.tag:
-            return f"note (created: {self._created_at}): {self.value}, tags: {[tag.value for tag in self.tag]}"
+            return [self._created_at, self.value, ', '.join([tag.value for tag in self.tag])]
         else:
-            return f"note (created: {self._created_at}): {self.value}"
+            return [self._created_at, self.value]
 
 
 class Address(Field):
@@ -117,7 +117,7 @@ class Address(Field):
         self._value = value
 
     def __str__(self) -> str:
-        return f"Address: {self.value}"
+        return self.value
 
 
 class Birthday(Field):
@@ -134,6 +134,9 @@ class Birthday(Field):
         except ValueError:
             print(f"Date of birth \"{value}\" is indicated incorrectly. It was not recorded.")
             self._value = ''
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class Record:
@@ -206,22 +209,31 @@ class Record:
             print(f"Old phone \"{old_phone}\" not found or new phone \"{new_phone}\" is present")
 
     def __str__(self) -> str:
-        result = f"Record of {self.name.value}"
-        if self.phone:
-            for one_phone in self.phone:
-                result += f": {one_phone}"
-        if self.address:
-            for one_address in self.address:
-                result += f", {one_address}"
-        if self.email:
-            for one_email in self.email:
-                result += f", {one_email}"
-        if self.birthday.value:
-            result += f", Birthday: {self.birthday.value}"
-            result += f", From current date to birthday: {self.days_to_birthday()} day(s)"
-        for one_note in self.note:
-            result += f", {one_note}"
-        return result
+        # result = f"Record of {self.name.value}"
+        # if self.phone:
+        #     for one_phone in self.phone:
+        #         result += f": {one_phone}"
+        # if self.address:
+        #     for one_address in self.address:
+        #         result += f": {one_address}"
+        # if self.email:
+        #     for one_email in self.email:
+        #         result += f": {one_email}"
+        # if self.birthday.value:
+        #     result += f": Birthday: {self.birthday.value}"
+        #     result += f": From current date to birthday: {self.days_to_birthday()} day(s)"
+        # for one_note in self.note:
+        #     result += f": {one_note}"
+        # return result
+        result = []
+        for name, obj in self.__dict__.items():
+            try:
+                result.append(f"{name.upper():<10}: {obj.value}")
+            except AttributeError:
+                for val in obj:
+                    result.append(f"{name.upper():<10}: {val.value}")
+        return "\n".join(result)
+
 
 class AddressBook(UserDict):
     """Add new instance of Record class in AddressBook"""
@@ -383,7 +395,8 @@ class AddressBook(UserDict):
         return sort_files_entry_point((''.join(self.__get_params({"path": ""}))))
 
     def iterator(self, n: str = 1) -> List[str]:
-        yield from ([f"{name}: {rec}" for name, rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
+        separator, enter = "="*60, "\n"
+        yield from ([f"{separator}: {enter}{rec}" for name, rec in list(self.items())[i: i + n]] for i in range(0, len(self), n))
 
     def save_data(self, filename: str) -> None:
         try:
@@ -471,7 +484,7 @@ class AddressBook(UserDict):
 
     def show_contacts(self, items_count: str = 1):
         for contacts in self.iterator(items_count):
-            print(contacts)
+            print(*contacts)
 
     def show_commands(self) -> None:
         """Displaying commands with the ability to execute them"""
