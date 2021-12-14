@@ -199,7 +199,7 @@ class AddressBook(UserDict):
             for name, rec in self.data.items():
                 date = datetime.strptime(rec.birthday.value, '%d.%m.%Y').replace(year=end_period.year)
                 if day_today_year < end_period.year:
-                    if day_today <= date.replace(year=day_today_year) <= end_period or day_today <= date <= end_period:
+                    if day_today <= date.replace(year=day_today_year) or date <= end_period:
                         result.append(f"{name}: {rec}")
                 else:
                     if day_today <= date.replace(year=day_today_year) <= end_period:
