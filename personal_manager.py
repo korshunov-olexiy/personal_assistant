@@ -240,7 +240,11 @@ class AddressBook(UserDict):
 
     def add_record(self) -> None:
         new_record = Record(*self.__get_params({"name": "", "phones": "", "birthday": "", "addresses": "", "emails": "", "notes": ""}))
-        while not hasattr(new_record, "birthday"):
+        while not new_record.name.value:
+            name_value = ''.join(self.__get_params({"name": ""}, "Username not recorded. Please enter the ")).strip()
+            if name_value:
+                new_record.name.value = name_value
+        while not hasattr(new_record, "birthday") or not new_record.birthday.value:
             birthday_value = ''.join(self.__get_params({"date of birth": ""}, "Date of birth not recorded. Please enter the correct ")).strip()
             if birthday_value:
                 new_record.birthday = Birthday(birthday_value)
