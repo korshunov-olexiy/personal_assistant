@@ -102,7 +102,7 @@ class Note(Field):
     def __str__(self) -> str:
         if self.tag:
             return ", ".join([f"created at {str(self._created_at)}:", \
-                self.value, f", tags: {', '.join([tag.value for tag in self.tag])}"])
+                self.value, f"tags: {', '.join([tag.value for tag in self.tag])}"])
         else:
             return f"created at {str(self._created_at)}: {self.value}"
 
