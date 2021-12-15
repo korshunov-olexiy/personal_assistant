@@ -271,7 +271,12 @@ class AddressBook(UserDict):
         print(f"You have selected: {option}")
         new_number = ''.join(self.__get_params({"new phone number": ""})).strip()
         if new_number:
-            record.phone[index].value = new_number
+            try:
+                record.phone[index].value = new_number
+            except InvalidPhoneNumber:
+                print("You entered an invalid phone number.This data is not recorded.")
+        else:
+            print("You have not provided a new phone number.")
 
     def _edit_birthday(self, record: Record) -> None:
         print(f"Current birthday of user \"{record.name.value}\" is: {record.birthday.value}")
@@ -295,7 +300,12 @@ class AddressBook(UserDict):
         print(f"You have selected: {option}")
         new_email = ''.join(self.__get_params({"new email": ""})).strip()
         if new_email:
-            record.email[index].value = new_email
+            try:
+                record.email[index].value = new_email
+            except InvalidEmailAddress:
+                print("You entered an invalid email address.This data is not recorded.")
+        else:
+            print("You have not provided a new email.")
 
     def _edit_tag(self, record: Record) -> None:
         note_option, note_index = pick([note.value for note in record.note], \
