@@ -18,10 +18,10 @@ Your personal helper on computer is able to do many things, such as:
 
 To use this program, you need simply download setup package with all necessary files from github.
 Package can be installed into system with a console command "python setup.py install". 
-After installation package [NAMEEEEEE] appear in the system. 
-When package has been installed, you can call command [HELPER] in any place from console.
+After installation package [personal-manager] appear in the system.
+When package has been installed, you can call command [personal-manager] in any place from console.
 
-[HELPEEEER] made for communication with user through console commands. 
+[personal-manager] made for communication with user through console commands.
 If user input command "help" - all possible commands(with descriptions) will be displayed. 
 This bot support commands: 
 "help", "add_contact", "edit_record", "holidays_period", "print_notes", "add_note", "edit_note",
