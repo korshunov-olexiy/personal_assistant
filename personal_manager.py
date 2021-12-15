@@ -492,7 +492,6 @@ class AddressBook(UserDict):
 class CommandHandler:
 
     def __call__(self, command: str) -> bool:
-        #command = command
         if command in exit_commands:
             return False
         elif command in action_commands:
